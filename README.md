@@ -52,7 +52,7 @@ A premium, character-focused AI roleplay platform built for anime and fiction en
 
 1. **Clone Repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/yashatgitt/Arcane.git
    cd one-last-hope
    ```
 
