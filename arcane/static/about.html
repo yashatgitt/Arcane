@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — ARCANE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0e0c;
+            --ink: #e8e4dc;
+            --red: #c9513a;
+            --faded: #8a8376;
+            --border: rgba(232, 228, 220, 0.12);
+            --faint: rgba(255, 255, 255, 0.02);
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: 'Noto Sans JP', sans-serif;
+            line-height: 1.6;
+            margin: 0; padding: 0;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            letter-spacing: 4px;
+            color: var(--red);
+            margin-bottom: 8px;
+        }
+        .header p {
+            font-family: 'Shippori Mincho', serif;
+            color: var(--faded);
+            font-style: italic;
+        }
+        .section {
+            margin-bottom: 40px;
+            background: var(--faint);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+        }
+        .section h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        /* FAQ accordion */
+        details {
+            border-bottom: 1px solid var(--border);
+            padding: 16px 0;
+        }
+        details:last-child {
+            border-bottom: none;
+        }
+        summary {
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        summary::after {
+            content: "↓";
+            font-size: 14px;
+            color: var(--red);
+            transition: transform 0.2s;
+        }
+        details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        details p {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--faded);
+        }
+        .social-tabs {
+            display: flex; gap: 16px;
+            margin-top: 40px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            background: transparent;
+            position: relative;
+            padding: 8px 20px;
+            display: flex; align-items: center;
+            font-size: 15px; font-weight: 600;
+            text-decoration: none; cursor: pointer;
+            border-radius: 25px; outline: none;
+            overflow: hidden;
+            transition: color 0.3s ease-out, border-color 0.3s ease-out;
+            text-align: center;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .social-btn span { margin-left: 8px; }
+
+        .social-btn::before {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            margin: auto; content: ""; border-radius: 50%;
+            display: block; width: 20em; height: 20em; left: -5em;
+            transition: box-shadow 0.4s ease-out; z-index: -1;
+        }
+
+        /* Github */
+        .social-btn.github { border: 1px solid #4a4a4a; color: #8a8a8a; }
+        .social-btn.github:hover { color: #fff; border-color: #24292e; }
+        .social-btn.github:hover::before { box-shadow: inset 0 0 0 10em #24292e; }
+
+        /* Linkedin */
+        .social-btn.linkedin { border: 1px solid rgb(0, 119, 181); color: rgb(0, 119, 181); }
+        .social-btn.linkedin:hover { color: #fff; border-color: rgb(0, 119, 181); }
+        .social-btn.linkedin:hover::before { box-shadow: inset 0 0 0 10em rgb(0, 119, 181); }
+        .footer {
+            margin-top: 60px;
+            padding: 40px 24px;
+            background: #090908;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .footer p {
+            font-size: 12px; color: var(--faded);
+        }
+        .back-nav {
+            position: fixed; top: 24px; left: 24px;
+            z-index: 100;
+        }
+        .back-btn {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            color: var(--ink); cursor: pointer; text-decoration: none; font-size: 18px;
+        }
+        .back-btn:hover { border-color: var(--red); }
+    </style>
+</head>
+<body>
+    <div class="back-nav"><a href="intro.html" class="back-btn">←</a></div>
+    <div class="container">
+        <header class="header">
+            <h1>About ARCANE</h1>
+            <p>A Seamless Bridge between AI Companion and Aesthetics</p>
+        </header>
+
+        <section class="section">
+            <h2>The Story of ARCANE</h2>
+            <p style="margin-bottom: 14px;">It began as a simple question: <em>What if interacting with an AI felt less like reading a spreadsheet, and more like turning the page of a beautifully illustrated novel?</em></p>
+            <p style="margin-bottom: 14px;">Standard AI assistants are built for dry spreadsheets or debugging code, stripping away every ounce of personality, depth, and fiction. <strong>ARCANE was born to reverse that philosophy.</strong> It started from a desire to hold conversations with beloved Anime and video game personalities without their dialogues feeling generic, restricted, or prompt-bound.</p>
+            <p style="margin-bottom: 14px;">The architecture quickly evolved into something greater. To prioritize maximum responsiveness and air-tight user privacy, ARCANE was grounded in **Edge Sub-threading**. Instead of routing your personal chat triggers through massive corporate cloud servers, it operates with fully containerized pipelines supporting local streams, meaning your stories live strictly within your dashboard scope downwards chords.</p>
+            <p>Then arrived the defining dimension—<strong>The Visual Novel Engine</strong>. To simulate deep immersive visual cues, an adaptive react component triggers hand-crafted graphics triggers automatically during response streams. Making ARCANE not merely an app or chatbot, but a gorgeous and aesthetic narrative sanctuary continuous streams backwards datasets framing absolute flawlessly offsets upwards !</p>
+        </section>
+
+        <section class="section">
+            <h2>The Vision</h2>
+            <p>ARCANE is crafted as a lightweight, offline-accessible dashboard that bridges immersive Visual Novel dynamics with state-of-the-art AI interactions. Purpose-built for low-latency streaming layouts on edge computers, supporting rich character customisation, visual scene reactors, and intelligent context scopes continuous seamlessly downwards flawlessly coordinate offsets thresholds !</p>
+        </section>
+
+        <section class="section">
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary><span>How does ARCANE respond so fast?</span></summary>
+                <p>ARCANE connects strictly edge architectures to local streams via sub-threaded LocalBridge endpoints and hyper-threaded API sockets so replies arrive streams seamlessly with zero cloud propagation absolute effortlessly setups downloads continuous!</p>
+            </details>
+            <details>
+                <summary><span>Can I clears conversation memory nodes comfortably?</span></summary>
+                <p>Absolutely. Navigating towards internal sidebar or menu actions triggers instantaneous purge execution queues across indices correctly.</p>
+            </details>
+            <details>
+                <summary><span>Are dialogue modes fully encrypted?</span></summary>
+                <p>Everything sits fully isolated within strictly Client-Bounded IndexedDB datasets setup node anchors frame backwards securely continuous properly forwards flawless.</p>
+            </details>
+        </section>
+
+        <div class="social-tabs">
+          <button class="social-btn github" onclick="window.open('https://github.com/yashatgitt', '_blank')">
+            <svg viewBox="0 0 16 16" fill="currentColor" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            <span>GitHub</span>
+          </button>
+          
+          <button class="social-btn linkedin" onclick="window.open('https://www.linkedin.com/in/yash-gangurde-95557328b/', '_blank')">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.3362 18.339H15.6707V14.1622C15.6707 13.1662 15.6505 11.8845 14.2817 11.8845C12.892 11.8845 12.6797 12.9683 12.6797 14.0887V18.339H10.0142V9.75H12.5747V10.9207H12.6092C12.967 10.2457 13.837 9.53325 15.1367 9.53325C17.8375 9.53325 18.337 11.3108 18.337 13.6245V18.339H18.3362ZM7.00373 8.57475C6.14573 8.57475 5.45648 7.88025 5.45648 7.026C5.45648 6.1725 6.14648 5.47875 7.00373 5.47875C7.85873 5.47875 8.55173 6.1725 8.55173 7.026C8.55173 7.88025 7.85798 8.57475 7.00373 8.57475ZM8.34023 18.339H5.66723V9.75H8.34023V18.339ZM19.6697 3H4.32923C3.59498 3 3.00098 3.5805 3.00098 4.29675V19.7033C3.00098 20.4202 3.59498 21 4.32923 21H19.6675C20.401 21 21.001 20.4202 21.001 19.7033V4.29675C21.001 3.5805 20.401 3 19.6675 3H19.6697Z"/></svg>
+            <span>LinkedIn</span>
+          </button>
+        </div>
+        <div style="text-align:center; margin-top: 20px; font-weight: 500; font-size: 14px; color: var(--red);">Made with ❤️ by Yash GG✨</div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2026 ARCANE AI Dashboard. Purely aesthetic edge dashboards setups.</p>
+    </footer>
+</body>
+</html>

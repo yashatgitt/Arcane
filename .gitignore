@@ -1,0 +1,50 @@
+# Root .gitignore for Pro-53 project
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets & Environment
+.env
+.env.local
+.env.*.local
+# DO COMMIT: .env.example should remain tracked as a template
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+arcane/arcane.db
+
+# Logs & Temporary Files
+*.log
+pip-log.txt
+vulnerability_report.txt
+tunnel/tunnel_url.txt
+tunnel_url.txt
+arcane/vulnerability_report.txt
+
+# Test Outputs
+arcane/static/test_sw_output.txt
+arcane/static/test_manifest_output.txt
+arcane/static/test_syntax.js
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Project Specific
+dist/
+build/
+*.egg-info/
+/site

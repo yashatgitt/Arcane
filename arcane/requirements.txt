@@ -1,0 +1,11 @@
+flask
+flask-cors
+flask-limiter
+flask-session
+requests
+python-dotenv
+tavily-python
+groq
+google-generativeai
+bcrypt
+PyJWT

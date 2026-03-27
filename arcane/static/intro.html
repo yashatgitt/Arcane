@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCANE — AI Companion</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300&family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@400;700&family=Shippori+Mincho:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+        :root {
+            /* Base Palette */
+            --bg: #0f0e0c;
+            --ink: #e8e4dc;
+            --red: #c9513a;
+            --faded: #8a8376;
+
+            /* Accents & Decor */
+            --pale-ink: #1f1d19;
+            --kanji-bg: rgba(255, 255, 255, 0.024);
+            --border-light: rgba(232, 228, 220, 0.125);
+            --vert-text: #4a4742;
+        }
+
+        body.light-mode {
+            --bg: #faf8f2;
+            --ink: #1a1814;
+            --red: #c9513a;
+            --faded: #9e9688;
+            --pale-ink: #e8e0d0;
+            --kanji-bg: rgba(0, 0, 0, 0.024);
+            --border-light: rgba(26, 24, 20, 0.125);
+            --vert-text: #c8c0b4;
+        }
+
+        body.light-mode .washi-overlay {
+            opacity: 0.05;
+            mix-blend-mode: overlay;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: 'Noto Sans JP', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Washi Paper Texture */
+        .washi-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.15;
+            mix-blend-mode: multiply;
+            width: 100%;
+            height: 100%;
+        }
+
+        body.dark {
+            .washi-overlay {
+                opacity: 0.05;
+                mix-blend-mode: overlay;
+            }
+        }
+
+        /* Background Elements */
+        .bg-kanji {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(300px, 40vw, 600px);
+            color: var(--kanji-bg);
+            z-index: -2;
+            line-height: 1;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .bg-strokes {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-strokes path {
+            fill: none;
+            stroke: var(--pale-ink);
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+
+        /* Decorative Fixed Elements */
+        .hanko {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--red);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Noto Serif JP', serif;
+            font-size: 12px;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .vert-text {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            writing-mode: vertical-rl;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            color: var(--vert-text);
+            letter-spacing: 0.2em;
+            user-select: none;
+        }
+
+        /* Hero Content */
+        .hero {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .eyebrow {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 11px;
+            color: var(--faded);
+            letter-spacing: 0.05em;
+            margin-bottom: 32px;
+        }
+
+        .hr-line {
+            width: 40px;
+            height: 6px;
+            margin-bottom: 24px;
+            overflow: visible;
+        }
+
+        .hr-line path {
+            fill: none;
+            stroke: var(--ink);
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            opacity: 0.15;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+
+        .title {
+            font-family: 'Shippori Mincho', serif;
+            font-weight: 700;
+            font-size: clamp(38px, 6vw, 60px);
+            color: var(--ink);
+            letter-spacing: 0.15em;
+            line-height: 1;
+            margin-left: 0.15em;
+            /* Offset for center alignment with letter-spacing */
+        }
+
+        .subtitle {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 14px;
+            color: var(--faded);
+            letter-spacing: 0.4em;
+            margin-top: 8px;
+            margin-left: 0.4em;
+        }
+
+        .tagline {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            font-size: 15px;
+            color: var(--faded);
+            line-height: 2;
+            max-width: 340px;
+            margin: 48px auto;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+
+        .btn {
+            cursor: pointer;
+            background: transparent;
+            outline: none;
+            border: none;
+            transition: all 0.4s ease-out;
+        }
+
+        .btn-primary {
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            font-family: 'Shippori Mincho', serif;
+            font-size: 14px;
+            padding: 12px 32px;
+            letter-spacing: 0.3em;
+            border-radius: 0;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--ink);
+            color: var(--bg);
+        }
+
+        .btn-secondary {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            color: var(--faded);
+            padding: 12px 0;
+        }
+
+        .btn-secondary:hover {
+            color: var(--ink);
+        }
+
+        /* Character Strip */
+        .characters-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .character-strip {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .char-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            position: relative;
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease-out;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .char-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(80%) sepia(10%);
+            transition: all 0.4s ease-out;
+        }
+
+        .char-circle .fallback {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 18px;
+            color: var(--faded);
+        }
+
+        .char-circle:hover {
+            border-color: var(--red);
+            box-shadow: 0 0 0 1px var(--red);
+        }
+
+        .char-circle:hover img {
+            filter: grayscale(0%) sepia(0%);
+        }
+
+        .char-more {
+            font-size: 10px;
+            color: var(--vert-text);
+            letter-spacing: 0.05em;
+        }
+
+        /* Animation Classes */
+        .anim-fade {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            .hanko {
+                top: 24px;
+                right: 24px;
+            }
+
+            .vert-text {
+                display: none;
+            }
+
+            .character-strip {
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 8px;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            .character-strip::-webkit-scrollbar {
+                display: none;
+            }
+
+            /* Add slight padding to ends of scroll area so circles don't hit screen edge */
+            .character-strip::before,
+            .character-strip::after {
+                content: '';
+                min-width: 8px;
+            }
+        }
+
+        /* Keyframes */
+        @keyframes drawStroke {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Execute Animations unless prefers-reduced-motion is on */
+        @media (prefers-reduced-motion: no-preference) {
+            .bg-strokes path {
+                animation: drawStroke 2.4s ease-out forwards;
+                animation-delay: 300ms;
+            }
+
+            .hr-line path {
+                animation: drawStroke 1s ease-out forwards;
+                animation-delay: 700ms;
+            }
+
+            .anim-fade[data-step="1"] {
+                animation: fadeUp 0.8s ease-out forwards 900ms;
+            }
+
+            .anim-fade[data-step="2"] {
+                animation: fadeUp 0.8s ease-out forwards 1100ms;
+            }
+
+            .anim-fade[data-step="3"] {
+                animation: fadeUp 0.8s ease-out forwards 1300ms;
+            }
+
+            .anim-fade[data-step="4"] {
+                animation: fadeUp 0.8s ease-out forwards 1500ms;
+            }
+
+            .anim-fade[data-step="5"] {
+                animation: fadeUp 0.8s ease-out forwards 1700ms;
+            }
+
+            .anim-fade[data-step="6"] {
+                animation: fadeUp 0.8s ease-out forwards 1900ms;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .anim-fade {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .bg-strokes path,
+            .hr-line path {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'dark';
+            if (t === 'light') { document.documentElement.classList.add('light-mode'); document.addEventListener('DOMContentLoaded', () => document.body.classList.add('light-mode')); }
+            else { document.documentElement.classList.remove('light-mode'); document.addEventListener('DOMContentLoaded', () => document.body.classList.remove('light-mode')); }
+        })();
+    </script>
+
+</head>
+
+<body>
+    <!-- LocalStorage Theme Hydration & Audio Controls -->
+    <script>
+        const video = document.getElementById('bg-video');
+        const theme = localStorage.getItem('theme');
+        if (theme === 'light') document.body.classList.remove('dark');
+    </script>
+
+    <!-- SVG Filters for Paper Texture -->
+    <svg class="washi-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="pointer-events: none;">
+        <filter id="noiseFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0, 0 1 0 0 0, 0 0 1 0 0, 0 0 0 0.1 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#noiseFilter)"></rect>
+    </svg>
+
+    <!-- Giant Kanji Background -->
+    <div class="bg-kanji">縁</div>
+
+    <!-- Imperfect Ink Brush Strokes -->
+    <svg class="bg-strokes" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="pointer-events: none;">
+        <!-- Top Left curving down -->
+        <path d="M-100,200 Q200,100 400,400 T800,800" stroke-width="12" pathLength="100" />
+        <!-- Bottom Right arching up -->
+        <path d="M1100,700 Q800,900 600,600 T200,-50" stroke-width="8" pathLength="100" />
+        <!-- Subtle middle stroke -->
+        <path d="M300,800 Q500,750 700,900" stroke-width="20" pathLength="100" opacity="0.5" />
+    </svg>
+
+    <!-- Decor -->
+    <div class="hanko">縁</div>
+    <div class="vert-text">アルケイン·コンパニオン</div>
+
+    <!-- Main Hero -->
+    <main class="hero">
+
+        <div class="eyebrow anim-fade" data-step="1">
+            <span>仲間を選べ</span>
+            <span>Choose your companion</span>
+        </div>
+
+        <!-- Hand-drawn HR -->
+        <svg class="hr-line" viewBox="0 0 40 6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M1,3 Q10,1 20,4 T39,3" pathLength="100" />
+        </svg>
+
+        <h1 class="title anim-fade" data-step="2">ARCANE</h1>
+        <div class="subtitle anim-fade" data-step="3">アルケイン</div>
+
+        <p class="tagline anim-fade" data-step="4">
+            Fifteen characters. One conversation at a time.
+        </p>
+
+        <div class="actions anim-fade" data-step="5">
+            <button class="btn btn-primary" id="enterBtn" type="button">Enter</button>
+            <button class="btn btn-secondary" onclick="window.location.href='about.html'">Learn more ↓</button>
+        </div>
+
+        <div class="characters-wrap anim-fade" data-step="6">
+            <div class="character-strip" id="avatar-strip">
+                <!-- JS Injected -->
+            </div>
+            <div class="char-more">and 10 more</div>
+        </div>
+
+    </main>
+
+    <script>
+        // =====================================================================
+        // App Routing Logic
+        // =====================================================================
+        document.getElementById('enterBtn').addEventListener('click', function () {
+            const IDB_NAME = 'arcane_db';
+            const IDB_VERSION = 5;
+
+            const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('profile')) db.createObjectStore('profile', { keyPath: 'id' });
+                if (!db.objectStoreNames.contains('messages')) {
+                    const s = db.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+                    s.createIndex('character', 'character', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('chatSettings')) db.createObjectStore('chatSettings', { keyPath: 'charId' });
+                if (!db.objectStoreNames.contains('custom_characters')) db.createObjectStore('custom_characters', { keyPath: 'id' });
+            };
+            req.onsuccess = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('profile')) {
+                    window.location.replace('onboarding.html');
+                    return;
+                }
+                const tx = db.transaction('profile', 'readonly');
+                const reqGet = tx.objectStore('profile').get('user');
+                reqGet.onsuccess = () => {
+                    if (reqGet.result && reqGet.result.name) {
+                        // Profile exists, proceed to chat
+                        var isMobile = window.innerWidth < 768 || /Android|iPhone|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
+                        window.location.replace(isMobile ? 'chat_mobile.html' : 'chat_pc.html');
+                    } else {
+                        window.location.replace('onboarding.html');
+                    }
+                };
+                reqGet.onerror = () => { window.location.replace('onboarding.html'); };
+            };
+            req.onerror = () => { window.location.replace('onboarding.html'); };
+        });
+
+        // -------------------------------------------------------------
+        // Avatar Rendering (Robust Direct URLs)
+        // -------------------------------------------------------------
+        document.addEventListener("DOMContentLoaded", () => {
+            const characters = [
+                { id: '17', fallback: 'ナ', img: 'https://wallpapercave.com/wp/wp8381183.png' },
+                { id: '40', fallback: 'ル', img: 'https://wallpapercave.com/uwp/uwp4973661.png' },
+                { id: '45627', fallback: 'リ', img: 'https://wallpapercave.com/wp/wp13092807.jpg' }, // Center: Levi
+                { id: '52819', fallback: '悟', img: 'https://wallpapercave.com/wp/wp12794778.png' },
+                { id: '246', fallback: 'ゴ', img: 'https://s4.anilist.co/file/anilistcdn/character/large/246-wsRRr6z1kii8.png' }
+            ];
+
+            const stripContainer = document.getElementById('avatar-strip');
+
+            characters.forEach((char) => {
+                const circle = document.createElement('div');
+                circle.className = 'char-circle';
+                circle.title = 'Enter ARCANE';
+                circle.addEventListener('click', () => {
+                    document.getElementById('enterBtn').click();
+                });
+
+                const img = document.createElement('img');
+                img.src = char.img;
+                img.alt = 'Character Avatar';
+                img.setAttribute("loading", "lazy");
+
+                if (char.id === '17') {
+                    img.style.objectPosition = 'bottom';
+                    img.style.transform = 'scale(1.25)';
+                }
+
+                if (char.id === '45627') {
+                    img.style.objectPosition = 'top';
+                }
+
+                let fallbackAttempted = false;
+                img.onerror = () => {
+                    if (!fallbackAttempted && char.id) {
+                        fallbackAttempted = true;
+                        fetch(`https://api.jikan.moe/v4/characters/${char.id}`)
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data && data.data && data.data.images && data.data.images.jpg.image_url) {
+                                    img.src = data.data.images.jpg.image_url;
+                                } else {
+                                    circle.innerHTML = `<span class="fallback">${char.fallback}</span>`;
+                                }
+                            })
+                            .catch(() => {
+                                circle.innerHTML = `<span class="fallback">${char.fallback}</span>`;
+                            });
+                    }
+                };
+
+                circle.appendChild(img);
+                stripContainer.appendChild(circle);
+            });
+
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => { });
+            });
+        }
+    </script>
+</body>

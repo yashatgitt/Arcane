@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCANE - Onboarding</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;600;700&family=Bangers&display=swap');
+
+        :root {
+            --paper: #0f0e0b;
+            --ink: #e8e4dc;
+            --vermillion: #c9513a;
+            --faded: #8a8376;
+            --border: #333;
+            --bg-accent: rgba(255, 255, 255, 0.03);
+
+            --font-serif: 'Shippori Mincho', serif;
+            --font-sans-jp: 'Noto Sans JP', sans-serif;
+            --font-sans: 'DM Sans', sans-serif;
+        }
+
+        body.light-mode {
+            --paper: #faf8f2;
+            --ink: #0f0e0b;
+            --faded: #9e9688;
+            --aged: #f3eedf;
+            --border: #e2d9c4;
+            --bg-accent: rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-kanji {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-serif);
+            font-size: clamp(200px, 30vw, 400px);
+            color: var(--bg-accent);
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            line-height: 1;
+        }
+
+        .hanko {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--vermillion);
+            color: var(--paper);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .vert-text {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            writing-mode: vertical-rl;
+            font-family: var(--font-sans-jp);
+            font-size: 11px;
+            color: var(--faded);
+            letter-spacing: 0.2em;
+        }
+
+        .onboarding-container {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            max-width: 540px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-height: 100vh;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .onboarding-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .step {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .step.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        .subtitle {
+            font-family: var(--font-sans-jp);
+            font-size: 12px;
+            color: var(--faded);
+            text-align: center;
+            letter-spacing: 0.2em;
+            margin-bottom: 40px;
+        }
+
+        p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .form-label {
+            display: block;
+            font-family: var(--font-sans-jp);
+            font-size: 11px;
+            color: var(--faded);
+            margin-bottom: 8px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            font-family: var(--font-serif);
+            font-size: 16px;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--ink);
+        }
+
+        .input-field::placeholder {
+            color: var(--faded);
+            font-family: var(--font-sans);
+            font-size: 14px;
+        }
+
+        .textarea-field {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .textarea-field:focus {
+            border-color: var(--ink);
+        }
+
+        .textarea-field::placeholder {
+            color: var(--faded);
+        }
+
+        /* Avatar Section */
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .avatar-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .selected-avatar-preview {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-accent);
+        }
+
+        .selected-avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .selected-avatar-preview .fallback {
+            font-family: var(--font-serif);
+            color: var(--faded);
+            font-size: 18px;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-accent);
+        }
+
+        .avatar-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(80%);
+            transition: filter 0.2s;
+        }
+
+        .avatar-option:hover img {
+            filter: grayscale(0%);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--vermillion);
+        }
+
+        .avatar-option.selected img {
+            filter: grayscale(0%);
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+            width: 100%;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--ink);
+            font-family: var(--font-sans-jp);
+            font-size: 10px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-small:hover {
+            border-color: var(--ink);
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            font-family: var(--font-serif);
+            font-size: 14px;
+            padding: 12px 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.2em;
+        }
+
+        .btn-primary:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .btn-text {
+            background: transparent;
+            border: none;
+            color: var(--faded);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 12px 20px;
+        }
+
+        .btn-text:hover {
+            color: var(--ink);
+        }
+
+        .progress {
+            display: flex;
+            gap: 8px;
+            margin-top: 32px;
+            justify-content: center;
+        }
+
+        .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--border);
+            transition: background-color 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background-color: var(--ink);
+        }
+
+        .error-msg {
+            color: var(--vermillion);
+            font-size: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+    </style>
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'dark';
+            if (t === 'light') { document.documentElement.classList.add('light-mode'); document.addEventListener('DOMContentLoaded', () => document.body.classList.add('light-mode')); }
+            else { document.documentElement.classList.remove('light-mode'); document.addEventListener('DOMContentLoaded', () => document.body.classList.remove('light-mode')); }
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div class="bg-kanji">始</div>
+    <div class="hanko">縁</div>
+    <div class="vert-text">アルケイン·コンパニオン</div>
+
+    <div class="onboarding-container">
+
+        <!-- Step 0: Authentication -->
+        <div class="step active" id="step-0">
+            <h1 id="authTitle">Sign In</h1>
+            <div class="subtitle">認証初期化</div>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="authUsername" class="input-field" maxlength="32"
+                    placeholder="Enter your username">
+                <div class="error-msg" id="usernameError"></div>
+            </div>
+
+            <!-- Email (Hidden in Login Mode) -->
+            <div class="form-group" id="emailGroup" style="display: none;">
+                <label class="form-label">Email Address</label>
+                <input type="email" id="authEmail" class="input-field" maxlength="64"
+                    placeholder="Enter your email">
+                <div class="error-msg" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="authPassword" class="input-field" maxlength="128"
+                    placeholder="Enter your password">
+                <div class="error-msg" id="passwordError"></div>
+            </div>
+
+            <!-- Confirm Password (Hidden in Login Mode) -->
+            <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" id="authConfirmPassword" class="input-field" maxlength="128"
+                    placeholder="Re-enter your password">
+                <div class="error-msg" id="confirmPasswordError"></div>
+            </div>
+
+            <div class="error-msg" id="generalError" style="text-align: center;"></div>
+
+            <div class="actions">
+                <button class="btn-primary" id="authButton">Sign In</button>
+            </div>
+
+            <div style="margin-top: 24px; text-align: center; font-size: 14px;">
+                <span id="authToggleText">Don't have an account? </span>
+                <button class="btn-text" id="authToggleBtn" style="padding: 0; color: var(--ink);">Sign Up</button>
+            </div>
+        </div>
+
+        <!-- Step 1: Profile -->
+        <div class="step" id="step-1">
+            <h1>Create Your Profile</h1>
+            <div class="subtitle">コアアイデンティティ設定</div>
+
+            <div class="form-group">
+                <label class="form-label">Callsign (Name)</label>
+                <input type="text" id="inp-name" class="input-field" maxlength="20"
+                    placeholder="How should the constructs address you?">
+                <div class="error-msg" id="err-name">Callsign is required for initialization.</div>
+            </div>
+
+            <div class="form-group" style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                <label class="form-label" style="text-align: center;">Avatar Form</label>
+                <div class="selected-avatar-preview"
+                    style="width: 80px; height: 80px; border-radius: 50%; border: 2px dashed var(--border); overflow: hidden; display: flex; justify-content: center; align-items: center; background: var(--bg-accent); margin-bottom: 12px; position:relative;">
+                    <img id="avatar-img" src="" alt="Avatar"
+                        style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <span class="fallback" id="avatar-fallback"
+                        style="font-family: 'Bangers', cursive; color: var(--vermillion); font-size: 32px; letter-spacing: 0.05em; text-align:center;">?</span>
+                </div>
+
+                <div class="file-upload-wrapper">
+                    <button type="button" class="btn-small">Upload Custom Photo</button>
+                    <input type="file" id="inp-file" accept="image/*">
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn-primary" onclick="nextStep(2)">Initialize</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Custom Instructions -->
+        <div class="step" id="step-2">
+            <h1 style="font-size: 26px;">Cognitive Directives</h1>
+            <div class="subtitle">カスタムインストラクション</div>
+
+            <div class="form-group">
+                <label class="form-label">User Persona (Who are you?)</label>
+                <textarea id="inp-persona" class="textarea-field" maxlength="1000"
+                    placeholder="Feed background data to the A.R.C.A.N.E. engine... What should your companions know about you? What are your affiliations, quirks, and goals?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">System Directives (How should they respond?)</label>
+                <textarea id="inp-instructions" class="textarea-field" maxlength="1000"
+                    placeholder="Establish global interaction rules... (e.g. Keep responses fully in character, emulate cinematic immersion, focus heavily on action tracking)"></textarea>
+            </div>
+
+            <div class="actions">
+                <button class="btn-text" onclick="nextStep(1)">Back</button>
+                <button class="btn-primary" onclick="nextStep(3)">Compile Specs</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Welcome -->
+        <div class="step" id="step-3">
+            <h1>Link Established</h1>
+            <div class="subtitle">接続完了</div>
+
+            <p
+                style="font-family: var(--font-sans); font-size: 14px; margin-top: 20px; color: var(--faded); line-height: 1.8;">
+                Your Advanced Roleplay Companion and Adaptive Neural Engine (A.R.C.A.N.E.) matrix is now active.
+                <br><br>
+                Neural sandbox encrypted. Cognitive sync stable.<br>
+                <span id="display-name"
+                    style="color: var(--vermillion); font-family: var(--font-serif); font-size: 20px; font-weight: 700; display: block; margin-top: 20px;"></span>
+            </p>
+
+            <div class="actions">
+                <button class="btn-text" onclick="nextStep(2)">Go Back</button>
+                <button class="btn-primary" id="btn-finish">Enter Sanctuary</button>
+            </div>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress">
+            <div class="progress-dot active" id="dot-0"></div>
+            <div class="progress-dot" id="dot-1"></div>
+            <div class="progress-dot" id="dot-2"></div>
+            <div class="progress-dot" id="dot-3"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Use high-reliability Anilist URLs for presets (avoids Jikan rate limiting)
+        const presetAvatars = [
+            "https://s4.anilist.co/file/anilistcdn/character/large/b85-cwGRoAfkQWXD.png", // Kakashi aesthetic
+            "https://s4.anilist.co/file/anilistcdn/character/large/b152196-TVCGCFMFmTOA.png", // Sukuna aesthetic
+            "https://s4.anilist.co/file/anilistcdn/character/large/b66171-t4j4o0I6a6Lz.png", // Makimak aesthetic
+            "https://s4.anilist.co/file/anilistcdn/character/large/b40-QnLgXnN3MOr1.png", // Ed Elric aesthetic
+            "https://s4.anilist.co/file/anilistcdn/character/large/b88308-r7vCnbZz27lD.png" // Esdeath aesthetic
+        ];
+
+        let userProfile = {
+            name: '', email: '', avatar: '',
+            persona: '', instructions: ''
+        };
+
+        // ===== AUTH INITIALIZATION =====
+        let isLoginMode = true;
+        let isAuthenticated = false;
+
+        const authUsername = document.getElementById('authUsername');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const authConfirmPassword = document.getElementById('authConfirmPassword');
+        const emailGroup = document.getElementById('emailGroup');
+        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+
+        const authButton = document.getElementById('authButton');
+        const authToggleBtn = document.getElementById('authToggleBtn');
+        const authToggleText = document.getElementById('authToggleText');
+        const authTitle = document.getElementById('authTitle');
+        const usernameError = document.getElementById('usernameError');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmPasswordError = document.getElementById('confirmPasswordError');
+        const generalError = document.getElementById('generalError');
+
+        const inpName = document.getElementById('inp-name');
+        const errName = document.getElementById('err-name');
+        const imgAvatar = document.getElementById('avatar-img');
+        const fallbackAvatar = document.getElementById('avatar-fallback');
+        const inpFile = document.getElementById('inp-file');
+        const inpPersona = document.getElementById('inp-persona');
+        const inpInstructions = document.getElementById('inp-instructions');
+
+        const IDB_NAME = 'arcane_db';
+        const IDB_VERSION = 5;
+
+        function initDB(cb) {
+            const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('messages')) {
+                    const msgStore = db.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+                    msgStore.createIndex('character', 'character', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('profile')) {
+                    db.createObjectStore('profile', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('chatSettings')) {
+                    db.createObjectStore('chatSettings', { keyPath: 'charId' });
+                }
+            };
+            req.onsuccess = (e) => cb(null, e.target.result);
+            req.onerror = (e) => cb(e.target.error, null);
+        }
+
+        function saveProfile(profile, cb) {
+            initDB((err, db) => {
+                if (err) return cb(err);
+                try {
+                    const tx = db.transaction('profile', 'readwrite');
+                    tx.objectStore('profile').put({ ...profile, id: 'user' });
+                    tx.oncomplete = () => cb(null);
+                } catch (e) { cb(e); }
+            });
+        }
+
+        // Setup Avatar Initials trigger
+        inpName.addEventListener('input', () => {
+            const name = inpName.value.trim();
+            if (name && (!imgAvatar.src || imgAvatar.style.display === 'none')) {
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                fallbackAvatar.style.display = 'block';
+                fallbackAvatar.textContent = initials;
+            } else if (!name) {
+                fallbackAvatar.textContent = "?";
+            }
+        });
+
+        function updateAvatar(base64orUrl) {
+            userProfile.avatar = base64orUrl;
+            imgAvatar.src = base64orUrl;
+            imgAvatar.style.display = 'block';
+            fallbackAvatar.style.display = 'none';
+        }
+
+        inpFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = () => updateAvatar(reader.result);
+            reader.readAsDataURL(file);
+        });
+
+        // ===== AUTH FUNCTIONS =====
+        function clearAuthErrors() {
+            usernameError.classList.remove('show');
+            emailError.classList.remove('show');
+            passwordError.classList.remove('show');
+            confirmPasswordError.classList.remove('show');
+            generalError.classList.remove('show');
+            generalError.textContent = '';
+        }
+
+        function showAuthError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId);
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        function showGeneralError(message) {
+            generalError.textContent = message;
+            generalError.classList.add('show');
+        }
+
+        async function handleAuth() {
+            clearAuthErrors();
+            const username = authUsername.value.trim();
+            const email = authEmail.value.trim();
+            const password = authPassword.value;
+            const confirmPassword = authConfirmPassword.value;
+
+            if (!username) {
+                showAuthError('usernameError', 'Username required');
+                return;
+            }
+            if (username.length < 3) {
+                showAuthError('usernameError', 'Username must be 3+ characters');
+                return;
+            }
+
+            if (!isLoginMode) {
+                if (!email) {
+                    showAuthError('emailError', 'Email required');
+                    return;
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showAuthError('emailError', 'Invalid email address');
+                    return;
+                }
+            }
+
+            if (!password) {
+                showAuthError('passwordError', 'Password required');
+                return;
+            }
+            if (password.length < 6) {
+                showAuthError('passwordError', 'Password must be 6+ characters');
+                return;
+            }
+
+            if (!isLoginMode && password !== confirmPassword) {
+                showAuthError('confirmPasswordError', 'Passwords do not match');
+                return;
+            }
+
+            authButton.disabled = true;
+            const endpoint = isLoginMode ? '/login' : '/register';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username, 
+                        email: isLoginMode ? undefined : email, 
+                        password,
+                        confirm_password: isLoginMode ? undefined : confirmPassword
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showGeneralError(data.error || 'Authentication failed');
+                    authButton.disabled = false;
+                    return;
+                }
+
+                // Store auth token and user ID
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('auth_user_id', data.user_id);
+                localStorage.setItem('auth_username', data.username);
+                if (data.email) localStorage.setItem('auth_email', data.email);
+                
+                isAuthenticated = true;
+
+                // Pre-fill profile name if not set
+                if (!inpName.value.trim()) {
+                    inpName.value = data.username;
+                    // Trigger avatar initials
+                    inpName.dispatchEvent(new Event('input'));
+                }
+
+                // Hide auth and proceed to profile step
+                nextStep(1);
+            } catch (err) {
+                showGeneralError('Network error: ' + err.message);
+                authButton.disabled = false;
+            }
+        }
+
+        authButton.addEventListener('click', handleAuth);
+
+        authUsername.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') authPassword.focus();
+        });
+
+        authPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAuth();
+        });
+
+        authToggleBtn.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            clearAuthErrors();
+            authUsername.value = '';
+            authEmail.value = '';
+            authPassword.value = '';
+            authConfirmPassword.value = '';
+
+            if (isLoginMode) {
+                authTitle.textContent = 'Sign In';
+                authButton.textContent = 'Sign In';
+                authToggleText.textContent = "Don't have an account? ";
+                authToggleBtn.textContent = 'Sign Up';
+                emailGroup.style.display = 'none';
+                confirmPasswordGroup.style.display = 'none';
+            } else {
+                authTitle.textContent = 'Sign Up';
+                authButton.textContent = 'Create Account';
+                authToggleText.textContent = 'Already have an account? ';
+                authToggleBtn.textContent = 'Sign In';
+                emailGroup.style.display = 'block';
+                confirmPasswordGroup.style.display = 'block';
+            }
+        });
+
+        // ===== PAGE LOAD CHECK =====
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                // Already authenticated, skip auth step
+                isAuthenticated = true;
+                const savedUsername = localStorage.getItem('auth_username');
+                if (savedUsername && !inpName.value.trim()) {
+                    inpName.value = savedUsername;
+                    // Trigger avatar initials
+                    setTimeout(() => inpName.dispatchEvent(new Event('input')), 50);
+                }
+                nextStep(1);
+            }
+        });
+
+        function nextStep(stepNum) {
+            if (stepNum > 1 && !inpName.value.trim()) {
+                errName.style.display = 'block';
+                return;
+            } else {
+                errName.style.display = 'none';
+            }
+
+            if (stepNum === 2 || stepNum === 3) {
+                userProfile.name = inpName.value.trim();
+                userProfile.email = localStorage.getItem('auth_email') || '';
+            }
+
+            if (stepNum === 3) {
+                userProfile.persona = inpPersona.value.trim();
+                userProfile.instructions = inpInstructions.value.trim();
+                document.getElementById('display-name').textContent = userProfile.name;
+            }
+
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.progress-dot').forEach((el, idx) => {
+                if (idx < stepNum) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            document.getElementById('step-' + stepNum).classList.add('active');
+        }
+
+        // Finish
+        document.getElementById('btn-finish').addEventListener('click', () => {
+            document.getElementById('btn-finish').disabled = true;
+            document.getElementById('btn-finish').textContent = 'Generating...';
+
+            saveProfile(userProfile, (err) => {
+                if (err) {
+                    alert('Save Error: ' + (err && err.message ? err.message : err));
+                    document.getElementById('btn-finish').disabled = false;
+                    document.getElementById('btn-finish').textContent = 'Enter Sanctuary';
+                    return;
+                }
+                const isMobile = window.innerWidth < 768 || /Android|iPhone|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent);
+                window.location.replace(isMobile ? 'chat_mobile.html' : 'chat_pc.html');
+            });
+        });
+    </script>
+</body>
+
+</html>
