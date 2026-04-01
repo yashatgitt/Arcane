@@ -24,11 +24,13 @@ arcane/arcane.db
 
 # Logs & Temporary Files
 *.log
-pip-log.txt
-vulnerability_report.txt
-tunnel/tunnel_url.txt
-tunnel_url.txt
-arcane/vulnerability_report.txt
+*.txt
+!user_list.txt
+!suggestions.txt
+!arcane/user_list.txt
+!arcane/suggestions.txt
+!**/user_list.txt
+!**/suggestions.txt
 
 # Test Outputs
 arcane/static/test_sw_output.txt

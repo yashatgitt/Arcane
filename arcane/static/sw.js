@@ -1,4 +1,10 @@
-const CACHE_NAME = 'arcane-cache-v4';
+/**
+ * A.R.C.A.N.E. — Service Worker (Legacy & Edge)
+ * Handles offline persistence, background asset caching,
+ * and instant-loading performance for the Progressive Web App.
+ * Strategy: Network-First for HTML, Stale-While-Revalidate for Assets.
+ */
+const CACHE_NAME = 'arcane-cache-v5';
 const urlsToCache = [
   '/',
   '/manifest.json',

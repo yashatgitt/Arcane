@@ -1,3 +1,10 @@
+"""
+A.R.C.A.N.E. — Database Maintenance Utility
+-------------------------------------------
+This script performs a safe wipe of the backend SQLite database (arcane.db).
+It is intended for development use to reset user states and test the
+PWA onboarding flow without manual file deletion.
+"""
 import sqlite3
 import os
 

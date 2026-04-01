@@ -1,6 +1,12 @@
 """
-LocalBridge — Ollama tunnel server with ngrok for remote API access.
-Single entry point: python run.py
+LocalBridge — Advanced Roleplay Chat & Anime Network Engine (A.R.C.A.N.E.)
+--------------------------------------------------------------------------
+This utility acts as a secure proxy between your local computer and the cloud.
+It automates the following processes:
+1. Starts the Ollama service locally if not already running.
+2. Establishes a secure ngrok tunnel on port 5000.
+3. Syncs the live tunnel URL to the main application's environment configuration.
+4. Forwards JSON payloads with X-API-Key security validation.
 """
 
 import json
@@ -275,7 +281,7 @@ signal.signal(signal.SIGTERM, shutdown)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     print("=" * 50)
-    print("  LocalBridge — Ollama Tunnel Server")
+    print("  Advanced Roleplay Chat & Anime Network Engine (A.R.C.A.N.E.)")
     print("=" * 50)
 
     start_ollama()

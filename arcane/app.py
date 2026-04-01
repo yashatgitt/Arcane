@@ -1,7 +1,10 @@
 """
-A.R.C.A.N.E. — Flask Backend
-Thin proxy that forwards chat requests through fallback chain:
-  Ollama (ngrok) → Groq → Gemini
+Advanced Roleplay Chat & Anime Network Engine (A.R.C.A.N.E.) — Flask Backend
+-----------------------------------------------------------------------------
+This is the core orchestration layer that manages user authentication (JWT),
+character personas, and message routing through a three-tier LLM fallback chain:
+1. Local Ollama (via Ngrok) -> 2. Groq (Llama 3.3) -> 3. Gemini 1.5 Flash.
+It also handles real-time web search integration via Tavily.
 """
 
 import json
@@ -94,6 +97,12 @@ def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect(DB_PATH)
         g.db.row_factory = sqlite3.Row
+        
+        # Enable WAL mode and other performance settings OUTSIDE of a transaction
+        g.db.execute('PRAGMA journal_mode=WAL')
+        g.db.execute('PRAGMA synchronous=NORMAL')
+        g.db.execute('PRAGMA busy_timeout=5000')
+
         # Create users table
         g.db.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -111,7 +120,6 @@ def get_db():
             g.db.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
         # Ensure any old NULL emails are empty strings
         g.db.execute("UPDATE users SET email = '' WHERE email IS NULL")
-        g.db.execute('PRAGMA journal_mode=WAL')
         # Create table with user_id
         g.db.execute('''
             CREATE TABLE IF NOT EXISTS messages (
