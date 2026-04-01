@@ -1,3 +1,0 @@
-ID: 1 | Username: yashh | Email: abc@xyz.com | Joined: 2026-03-27 19:17:57 | IP: 127.0.0.1
-ID: 2 | Username: yash | Email: abc@xyz.com | Joined: 2026-03-27 19:21:44 | IP: 127.0.0.1
-ID: 3 | Username: test | Email: abc@xyz.com | Joined: 2026-03-27 19:22:48 | IP: 127.0.0.1
