@@ -83,7 +83,10 @@
             font-family: var(--font-serif);
             font-size: 14px;
             z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s;
         }
+        .hanko:hover { transform: scale(1.1); }
 
         .vert-text {
             position: absolute;
@@ -418,7 +421,14 @@
 <body>
 
     <div class="bg-kanji">始</div>
-    <div class="hanko">縁</div>
+    <div class="hanko" onclick="toggleTheme()" title="Toggle Theme">縁</div>
+    <script>
+        function toggleTheme() {
+            const isLight = document.documentElement.classList.toggle('light-mode');
+            document.body.classList.toggle('light-mode', isLight);
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+    </script>
     <div class="vert-text">アルケイン·コンパニオン</div>
 
     <div class="onboarding-container">

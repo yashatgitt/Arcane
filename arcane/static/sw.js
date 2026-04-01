@@ -16,7 +16,7 @@ const urlsToCache = [
 
 // Installs and forces update skip waiting
 self.addEventListener('install', event => {
-  self.skipWaiting(); 
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
       Promise.allSettled(
@@ -40,11 +40,11 @@ self.addEventListener('activate', event => {
         })
       );
     }).then(() => self.clients.claim()) // 🚀 Take control of all pages instantly
-    .then(() => {
-      return self.clients.matchAll({ type: 'window' }).then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
-      });
-    })
+      .then(() => {
+        return self.clients.matchAll({ type: 'window' }).then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+        });
+      })
   );
 });
 
@@ -56,7 +56,7 @@ self.addEventListener('fetch', event => {
 
   // 🚀 Bypass Service Worker completely for Localhost (Instant Development)
   if (requestUrl.hostname === 'localhost' || requestUrl.hostname === '127.0.0.1') {
-    return; 
+    return;
   }
 
   // Strategy 1: Network-First for HTML/Navigation request
@@ -77,9 +77,9 @@ self.addEventListener('fetch', event => {
 
   // Network-Only for API endpoints (Never cache dynamic endpoints)
   if (requestUrl.pathname.startsWith('/characters') ||
-      requestUrl.pathname.startsWith('/history') ||
-      requestUrl.pathname.startsWith('/models') ||
-      requestUrl.pathname.startsWith('/health')) {
+    requestUrl.pathname.startsWith('/history') ||
+    requestUrl.pathname.startsWith('/models') ||
+    requestUrl.pathname.startsWith('/health')) {
     event.respondWith(fetch(event.request));
     return;
   }

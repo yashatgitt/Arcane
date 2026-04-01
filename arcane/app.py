@@ -9,7 +9,6 @@ It also handles real-time web search integration via Tavily.
 
 import json
 import os
-import sqlite3
 from datetime import datetime, timedelta, timezone
 import traceback
 import re
@@ -27,6 +26,7 @@ import threading
 import time
 import bcrypt
 import jwt
+from supabase import create_client, Client
 
 from tavily import TavilyClient
 from groq import Groq
@@ -50,10 +50,18 @@ if not JWT_SECRET:
     raise ValueError("JWT_SECRET environment variable is required. Generate with: python -c 'import secrets; print(secrets.token_hex(32))'")
 JWT_EXPIRY     = 30 * 24 * 60 * 60  # 30 days
 
+# Supabase Configuration
+SUPABASE_URL   = os.getenv('SUPABASE_URL', '').strip()
+SUPABASE_KEY   = os.getenv('SUPABASE_KEY', '').strip()
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("SUPABASE_URL and SUPABASE_KEY environment variables are required")
+
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
 CHARACTERS_FILE = os.path.join(BASE_DIR, 'characters.json')
-DB_PATH        = os.path.join(BASE_DIR, 'arcane.db')
 STATIC_DIR     = os.path.join(BASE_DIR, 'static')
+
+# Initialize Supabase Client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Initialize Clients
 tavily = TavilyClient(api_key=TAVILY_API_KEY) if TAVILY_API_KEY else None
@@ -93,60 +101,27 @@ if NGROK_URL and NGROK_URL not in origins:
 CORS(app, origins=origins, methods=['GET', 'POST', 'DELETE', 'OPTIONS'], allow_headers=['Content-Type', 'X-User-ID'])
 
 # ---------------------------------------------------------------------------
-# SQLite helpers
+# Supabase Database Helpers
 # ---------------------------------------------------------------------------
 def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
-        
-        # Enable WAL mode and other performance settings OUTSIDE of a transaction
-        g.db.execute('PRAGMA journal_mode=WAL')
-        g.db.execute('PRAGMA synchronous=NORMAL')
-        g.db.execute('PRAGMA busy_timeout=5000')
+    """Returns the Supabase client."""
+    return supabase
 
-        # Create users table
-        g.db.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        # Check if email column exists (for migration)
-        cursor = g.db.execute("PRAGMA table_info(users)")
-        cols = [c[1] for c in cursor.fetchall()]
-        if 'email' not in cols:
-            g.db.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
-        # Ensure any old NULL emails are empty strings
-        g.db.execute("UPDATE users SET email = '' WHERE email IS NULL")
-        # Create table with user_id
-        g.db.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id TEXT,
-                character TEXT NOT NULL,
-                role TEXT NOT NULL,
-                content TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-        g.db.execute('CREATE INDEX IF NOT EXISTS idx_messages_user_char ON messages (user_id, character)')
-        # Check if user_id column exists (for migration)
-        cursor = g.db.execute("PRAGMA table_info(messages)")
-        cols = [c[1] for c in cursor.fetchall()]
-        if 'user_id' not in cols:
-            g.db.execute("ALTER TABLE messages ADD COLUMN user_id TEXT DEFAULT 'global'")
-        g.db.commit()
-    return g.db
+@app.before_request
+def init_supabase_tables():
+    """
+    Supabase tables must be created manually via the SQL editor.
+    This is just a placeholder for consistency with the Flask pattern.
+    """
+    pass
 
 @app.teardown_appcontext
 def close_db(exc):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+    """
+    No cleanup needed for Supabase client.
+    Keeping this for consistency with Flask patterns.
+    """
+    pass
 
 # ---------------------------------------------------------------------------
 # Input Sanitization
@@ -290,7 +265,7 @@ def run_tool(name, args):
 # ---------------------------------------------------------------------------
 # Fallback chain
 # ---------------------------------------------------------------------------
-def try_ollama(character, messages, tools=None, max_tokens=250):
+def try_ollama(character, messages, tools=None, max_tokens=250, image_b64=None):
     """Try the local Ollama model via ngrok tunnel with optional tools."""
     if not NGROK_URL:
         return None
@@ -320,6 +295,7 @@ def try_ollama(character, messages, tools=None, max_tokens=250):
             json={
                 'character': character, 
                 'message': messages[-1]['content'], 
+                'image': image_b64,
                 'history': messages[:-1],
                 'messages': messages,  # Pass the full list so full tool-followup roles carry over!
                 'tools': tools,
@@ -344,19 +320,36 @@ def try_ollama(character, messages, tools=None, max_tokens=250):
     return None
 
 
-def chat_groq(messages, system_prompt, max_tokens=120):
+def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None):
     """Groq API using official SDK + Tool Calling"""
     if not groq_client:
         print("[!] Groq client not initialized (missing API key)")
         return None
     
     try:
+        model_name = "llama-3.3-70b-versatile"
+        kwargs = {"max_tokens": max_tokens}
+        msgs = [{"role": "system", "content": system_prompt}] + messages
+        
+        if image_b64:
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+            # Modify the last user message to include the image
+            for i in range(len(msgs)-1, -1, -1):
+                if msgs[i]['role'] == 'user':
+                    msgs[i]['content'] = [
+                        {"type": "image_url", "image_url": {"url": image_b64 if image_b64.startswith("data:") else f"data:image/jpeg;base64,{image_b64}"}},
+                        {"type": "text", "text": str(msgs[i]['content'])}
+                    ]
+                    break
+        else:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
+            
+        kwargs["model"] = model_name
+        
         first = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": system_prompt}] + messages,
-            tools=tools,
-            tool_choice="auto",
-            max_tokens=max_tokens
+            messages=msgs,
+            **kwargs
         )
     except Exception as e:
         err_str = str(e)
@@ -364,11 +357,10 @@ def chat_groq(messages, system_prompt, max_tokens=120):
         if 'tool_use_failed' in err_str or 'tool call validation failed' in err_str:
             try:
                 print("[!] Groq tool call failed, retrying without tools")
+                msgs[0]["content"] += "\n\nNOTE: Web search is currently unavailable. If asked about real-time info, say you cannot access it right now."
                 fallback = groq_client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "system", "content": system_prompt + 
-                               "\n\nNOTE: Web search is currently unavailable. If asked about real-time info, say you cannot access it right now."}] 
-                            + messages,
+                    model=model_name,
+                    messages=msgs,
                     max_tokens=max_tokens
                 )
                 return fallback.choices[0].message.content
@@ -413,7 +405,7 @@ def chat_groq(messages, system_prompt, max_tokens=120):
 
         try:
             final = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=model_name,
                 messages=[{"role": "system", "content": system_prompt}] + followup,
                 max_tokens=max_tokens
             )
@@ -425,7 +417,7 @@ def chat_groq(messages, system_prompt, max_tokens=120):
     return msg.content
 
 
-def chat_gemini(messages, system_prompt, max_tokens=120):
+def chat_gemini(messages, system_prompt, max_tokens=120, image_b64=None):
     """Gemini API using official SDK + Tool Calling"""
     if not GEMINI_API_KEY:
         print("[!] Gemini API key not set")
@@ -440,9 +432,20 @@ def chat_gemini(messages, system_prompt, max_tokens=120):
         
         # Format messages for Gemini SDK (using "user" and "model")
         contents = []
-        for m in messages:
-             role = 'user' if m['role'] == 'user' else 'model'
-             contents.append({'role': role, 'parts': [m['content']]})
+        for i, m in enumerate(messages):
+            role = 'user' if m['role'] == 'user' else 'model'
+            parts = [m['content']]
+            
+            if image_b64 and i == len(messages) - 1 and role == 'user':
+                import base64
+                mime_type = "image/jpeg"
+                b64_data = image_b64
+                if image_b64.startswith("data:"):
+                    mime_type = image_b64.split(";")[0].split(":")[1]
+                    b64_data = image_b64.split(",")[1]
+                parts.append({"mime_type": mime_type, "data": base64.b64decode(b64_data)})
+                
+            contents.append({'role': role, 'parts': parts})
 
         generation_config = genai.types.GenerationConfig(
             max_output_tokens=max_tokens
@@ -517,37 +520,39 @@ def register():
         
         # Basic email regex
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            return jsonify({'error': 'Invalid email address'}), 400
+            return jsonify({'error': 'Invalid ID'}), 400
+        
+        # Check email domain - only gmail.com and outlook.com allowed
+        email_domain = email.split('@')[-1].lower() if '@' in email else ''
+        if email_domain not in ['gmail.com', 'outlook.com','yahoo.com','icloud.com','hotmail.com']:
+            return jsonify({'error': 'Invalid ID'}), 400
 
         db = get_db()
         # Check if user exists (case-insensitive)
-        existing = db.execute('SELECT id FROM users WHERE LOWER(username) = LOWER(?)', (username,)).fetchone()
-        if existing:
-            return jsonify({'error': 'Username already taken'}), 409
+        result = db.table('users').select('id, username').execute()
+        for user_row in result.data:
+            if user_row['username'].lower() == username.lower():
+                return jsonify({'error': 'Username already taken'}), 409
         
         # Hash password and create user
         password_hash = hash_password(password)
-        cursor = db.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
-                           (username, email, password_hash))
-        db.commit()
-        user_id = cursor.lastrowid
+        insert_result = db.table('users').insert({
+            'username': username,
+            'email': email,
+            'password_hash': password_hash
+        }).execute()
         
-        # Save to user_list.txt
-        try:
-            list_file = os.path.join(BASE_DIR, 'user_list.txt')
-            with open(list_file, 'a', encoding='utf-8') as f:
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                ip = request.remote_addr
-                f.write(f"ID: {user_id} | Username: {username} | Email: {email} | Joined: {timestamp} | IP: {ip}\n")
-        except Exception as e:
-            print(f"[!] Error writing to user_list.txt: {e}")
+        if not insert_result.data:
+            return jsonify({'error': 'Failed to create user'}), 500
+        
+        user_id = insert_result.data[0]['id']
 
         # Create JWT token
-        token = create_jwt_token(user_id, username)
+        token = create_jwt_token(str(user_id), username)
         return jsonify({
             'status': 'ok',
             'token': token,
-            'user_id': user_id,
+            'user_id': str(user_id),
             'username': username,
             'email': email
         }), 201
@@ -568,9 +573,14 @@ def login():
             return jsonify({'error': 'Username and password required'}), 400
         
         db = get_db()
-        # Find user (case-insensitive)
-        user = db.execute('SELECT id, username, password_hash, email FROM users WHERE LOWER(username) = LOWER(?)',
-                         (username,)).fetchone()
+        # Find user (case-insensitive by fetching and comparing)
+        result = db.table('users').select('id, username, password_hash, email').execute()
+        user = None
+        for row in result.data:
+            if row['username'].lower() == username.lower():
+                user = row
+                break
+        
         if not user:
             return jsonify({'error': 'Invalid username or password'}), 401
         
@@ -580,11 +590,11 @@ def login():
             return jsonify({'error': 'Invalid username or password'}), 401
         
         # Create JWT token
-        token = create_jwt_token(user['id'], user['username'])
+        token = create_jwt_token(str(user['id']), user['username'])
         return jsonify({
             'status': 'ok',
             'token': token,
-            'user_id': user['id'],
+            'user_id': str(user['id']),
             'username': user['username'],
             'email': user['email']
         }), 200
@@ -638,9 +648,12 @@ def chat():
     messages.append({'role': 'user', 'content': str(user_message)})
 
     db = get_db()
-    db.execute('INSERT INTO messages (user_id, character, role, content) VALUES (?, ?, ?, ?)',
-               (user_id, char_id, 'user', user_message))
-    db.commit()
+    db.table('messages').insert({
+        'user_id': user_id,
+        'character': char_id,
+        'role': 'user',
+        'content': user_message
+    }).execute()
 
     extra_context = str(data.get('extra_context', '')).strip()[:200]
     
@@ -749,10 +762,12 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     source = "Gr"
     reply = None
     
+    image_b64 = data.get('image', None)
+
     # Try Ollama directly (with tools if supported)
     if not char_id.startswith('custom_'):
         try:
-            r_dict = try_ollama(char_id, ollama_messages, tools=active_tools, max_tokens=max_tokens)
+            r_dict = try_ollama(char_id, ollama_messages, tools=active_tools, max_tokens=max_tokens, image_b64=image_b64)
             if r_dict is not None and isinstance(r_dict, dict):
                 if r_dict.get('error_msg'):
                     # Log it, don't silently swallow
@@ -795,7 +810,7 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     if reply is None:
         # Try Groq with tools
         try:
-            r = chat_groq(list(messages), system_prompt, max_tokens=max_tokens)
+            r = chat_groq(list(messages), system_prompt, max_tokens=max_tokens, image_b64=image_b64)
             if r is not None:
                 reply = r
                 source = "groq"
@@ -805,7 +820,7 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     if reply is None:
         # Try Gemini with tools
         try:
-            r = chat_gemini(list(messages), system_prompt, max_tokens=max_tokens)
+            r = chat_gemini(list(messages), system_prompt, max_tokens=max_tokens, image_b64=image_b64)
             if r is not None:
                 reply = r
                 source = "gemini"
@@ -837,9 +852,12 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     if not reply:
         reply = 'Signal lost.'
 
-    db.execute('INSERT INTO messages (user_id, character, role, content) VALUES (?, ?, ?, ?)',
-               (user_id, char_id, 'assistant', reply))
-    db.commit()
+    db.table('messages').insert({
+        'user_id': user_id,
+        'character': char_id,
+        'role': 'assistant',
+        'content': reply
+    }).execute()
 
     return jsonify({'response': reply, 'character': char_id, 'source': source})
 
@@ -852,13 +870,11 @@ def get_characters():
 def get_history(character):
     user_id = get_user_id_from_request()
     db = get_db()
-    rows = db.execute(
-        'SELECT role, content, created_at FROM messages WHERE character = ? AND user_id = ? ORDER BY id DESC LIMIT 50',
-        (character, user_id)
-    ).fetchall()
+    result = db.table('messages').select('role, content, created_at').eq('character', character).eq('user_id', user_id).order('id', desc=True).limit(50).execute()
+    rows = result.data
     rows.reverse()
-    result = [{'role': r['role'], 'content': r['content'], 'created_at': r['created_at']} for r in rows]
-    return jsonify(result)
+    result_list = [{'role': r['role'], 'content': r['content'], 'created_at': r['created_at']} for r in rows]
+    return jsonify(result_list)
 
 @app.route('/history/<character>', methods=['POST'])
 def save_history(character):
@@ -867,9 +883,12 @@ def save_history(character):
     role = data.get('role', 'user')
     content = data.get('content', '')
     db = get_db()
-    db.execute('INSERT INTO messages (user_id, character, role, content) VALUES (?, ?, ?, ?)',
-               (user_id, character, role, content))
-    db.commit()
+    db.table('messages').insert({
+        'user_id': user_id,
+        'character': character,
+        'role': role,
+        'content': content
+    }).execute()
     return jsonify({'status': 'ok'})
 
 @app.route('/history/<character>', methods=['DELETE', 'OPTIONS'])
@@ -883,17 +902,15 @@ def delete_history(character):
             
         db = get_db()
         if character == 'all':
-            db.execute('DELETE FROM messages WHERE user_id = ?', (user_id,))
+            db.table('messages').delete().eq('user_id', user_id).execute()
         elif character == 'profile_wipe':
             # 1. Delete all chat messages for this user
-            db.execute('DELETE FROM messages WHERE user_id = ?', (user_id,))
+            db.table('messages').delete().eq('user_id', user_id).execute()
             # 2. Delete the user account record
-            db.execute('DELETE FROM users WHERE id = ?', (user_id,))
-            db.commit()
+            db.table('users').delete().eq('id', user_id).execute()
             return jsonify({'status': 'ok', 'message': 'Account and all data wiped.'}), 200
         else:
-            db.execute('DELETE FROM messages WHERE character = ? AND user_id = ?', (character, user_id))
-        db.commit()
+            db.table('messages').delete().eq('character', character).eq('user_id', user_id).execute()
         return jsonify({'status': 'ok', 'deleted_character': character, 'user_id': user_id}), 200
     except Exception as e:
         print(f"[!] Delete data error: {e}")
@@ -905,26 +922,22 @@ def delete_history(character):
 def save_suggestion():
     data = request.json or {}
     suggestion = data.get('suggestion', '').strip()
+    user_id = data.get('user_id', None)
+    
     if suggestion:
-        # Capture User Metadata
         user_ip = request.remote_addr
         user_agent = request.headers.get('User-Agent', 'Unknown')
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        log_entry = (
-            f"Timestamp: {timestamp}\n"
-            f"IP: {user_ip}\n"
-            f"User-Agent: {user_agent}\n"
-            f"Feedback: {suggestion}\n"
-            f"{'='*40}\n"
-        )
-        
-        log_path = os.path.join(BASE_DIR, 'suggestions.txt')
-        if os.path.exists(log_path) and os.path.getsize(log_path) > 1_000_000:
-            return jsonify({'status': 'ok'})
-
-        with open(log_path, 'a', encoding='utf-8') as f:
-            f.write(log_entry)
+        try:
+            db = get_db()
+            db.table('suggestions').insert({
+                'user_id': user_id,
+                'suggestion': suggestion,
+                'ip_address': user_ip,
+                'user_agent': user_agent
+            }).execute()
+        except Exception as e:
+            print(f"[!] Failed to insert suggestion to Supabase: {e}")
             
     return jsonify({'status': 'ok'})
 

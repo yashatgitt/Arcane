@@ -114,6 +114,7 @@ def chat():
     user_message = data.get("message", "")
     history = data.get("history", [])
 
+    MODELS = load_models()
     if character not in MODELS:
         return jsonify({"error": f"Character '{character}' not found in models.json"}), 404
 

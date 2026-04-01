@@ -1,47 +1,47 @@
 {
   "naruto_uzumaki": {
-    "model_name": "naruto_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "l_lawliet": {
-    "model_name": "l_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "gojo_satoru": {
-    "model_name": "gojo_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "levi_ackerman": {
-    "model_name": "levi_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "light_yagami": {
-    "model_name": "light_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "goku": {
-    "model_name": "goku_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "itachi_uchiha": {
-    "model_name": "itachi_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "eren_yeager": {
-    "model_name": "eren_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "roronoa_zoro": {
-    "model_name": "zoro_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "kakashi_hatake": {
-    "model_name": "kakashi_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "saitama": {
-    "model_name": "saitama_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "tanjiro_kamado": {
-    "model_name": "tanjiro_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "sukuna": {
-    "model_name": "sukuna_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "monkey_d_luffy": {
-    "model_name": "luffy_modelfile"
+    "model_name": "llama3.1:8b"
   },
   "mikasa_ackerman": {
-    "model_name": "mikasa_modelfile"
+    "model_name": "llama3.1:8b"
   }
 }

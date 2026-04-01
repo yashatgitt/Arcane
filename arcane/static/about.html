@@ -1,212 +1,896 @@
 <!DOCTYPE html>
-<!--
-  A.R.C.A.N.E. — Project Compendium
-  Documentation, project lore, creator credits, and FAQs
-  regarding the edge-based AI architecture.
--->
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About — Advanced Roleplay Chat & Anime Network Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+JP:wght@300;400;500&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
+    <title>About — A.R.C.A.N.E</title>
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@400;700&family=Shippori+Mincho:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --bg: #0f0e0c;
             --ink: #e8e4dc;
             --red: #c9513a;
             --faded: #8a8376;
+            --pale-ink: #1f1d19;
+            --kanji-bg: rgba(255, 255, 255, 0.024);
             --border: rgba(232, 228, 220, 0.12);
             --faint: rgba(255, 255, 255, 0.02);
+            --vert-text: #4a4742;
         }
+
+        body.light-mode {
+            --bg: #faf8f2;
+            --ink: #1a1814;
+            --red: #c9513a;
+            --faded: #9e9688;
+            --pale-ink: #e8e0d0;
+            --kanji-bg: rgba(0, 0, 0, 0.024);
+            --border: rgba(26, 24, 20, 0.12);
+            --faint: rgba(0, 0, 0, 0.02);
+            --vert-text: #c8c0b4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--ink);
             font-family: 'Noto Sans JP', sans-serif;
-            line-height: 1.6;
-            margin: 0; padding: 0;
+            min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 60px 24px;
+
+        .washi {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.12;
+            mix-blend-mode: multiply;
+            width: 100%;
+            height: 100%;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
+
+        body.light-mode .washi {
+            opacity: 0.05;
+            mix-blend-mode: overlay;
         }
-        .header h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 36px;
-            letter-spacing: 4px;
-            color: var(--red);
-            margin-bottom: 8px;
+
+        .bg-kanji {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(300px, 40vw, 580px);
+            color: var(--kanji-bg);
+            z-index: 0;
+            line-height: 1;
+            user-select: none;
+            pointer-events: none;
         }
-        .header p {
-            font-family: 'Shippori Mincho', serif;
+
+        .hanko {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--red);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Noto Serif JP', serif;
+            font-size: 12px;
+            z-index: 100;
+            user-select: none;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .hanko:hover { transform: scale(1.1); }
+
+        .vert-text {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            writing-mode: vertical-rl;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            color: var(--vert-text);
+            letter-spacing: 0.2em;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 36px;
+            left: 40px;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
             color: var(--faded);
-            font-style: italic;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            z-index: 100;
+            transition: color 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .section {
-            margin-bottom: 40px;
-            background: var(--faint);
+
+        .back-btn:hover {
+            color: var(--ink);
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 120px 2rem 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding-bottom: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .hero-eyebrow {
+            font-size: 10px;
+            color: var(--faded);
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+        }
+
+        .hero-title {
+            font-family: 'Shippori Mincho', serif;
+            font-size: clamp(28px, 5vw, 44px);
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: 0.08em;
+            line-height: 1.2;
+        }
+
+        .hero-title span {
+            color: var(--red);
+        }
+
+        .hero-sub {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            font-size: 14px;
+            color: var(--faded);
+            line-height: 2;
+            max-width: 440px;
+        }
+
+        /* BLOCKS */
+        .block {
+            border-top: 1px solid var(--border);
+            padding: 52px 0;
+        }
+
+        .block-label {
+            font-size: 10px;
+            color: var(--faded);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .block-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* STORY */
+        .story-body {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            font-size: 14px;
+            color: var(--faded);
+            line-height: 2;
+        }
+
+        .story-body em {
+            color: var(--ink);
+            font-style: normal;
+            font-family: 'Shippori Mincho', serif;
+        }
+
+        /* CHAIN */
+        .chain {
+            display: flex;
+            align-items: stretch;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
-        .section h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 20px;
-            margin-bottom: 16px;
+
+        .chain-node {
+            flex: 1;
+            padding: 18px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            border-right: 1px solid var(--border);
+        }
+
+        .chain-node:last-child {
+            border-right: none;
+        }
+
+        .chain-node.hot {
+            background: rgba(201, 81, 58, 0.06);
+        }
+
+        .chain-badge {
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--faded);
+        }
+
+        .chain-name {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 15px;
+            color: var(--ink);
+        }
+
+        .chain-node.hot .chain-name {
+            color: var(--red);
+        }
+
+        .chain-model {
+            font-size: 10px;
+            color: var(--faded);
+            letter-spacing: 0.05em;
+        }
+
+        .chain-arrow {
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            color: var(--faded);
+            font-size: 10px;
+        }
+
+        .chain-desc {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            color: var(--faded);
+            line-height: 1.9;
+        }
+
+        /* TECH TABLE */
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--border);
+        }
+
+        .tech-table tr {
             border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            letter-spacing: 1px;
         }
-        /* FAQ accordion */
-        details {
-            border-bottom: 1px solid var(--border);
-            padding: 16px 0;
-        }
-        details:last-child {
+
+        .tech-table tr:last-child {
             border-bottom: none;
         }
+
+        .tech-table td {
+            padding: 13px 16px;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .tech-table td:first-child {
+            font-family: 'Noto Sans JP', sans-serif;
+            color: var(--faded);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            white-space: nowrap;
+            width: 120px;
+        }
+
+        .tech-table td:last-child {
+            font-family: 'Shippori Mincho', serif;
+            color: var(--ink);
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 10px;
+            color: var(--red);
+            border: 1px solid rgba(201, 81, 58, 0.3);
+            padding: 1px 7px;
+            margin-left: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        /* FAQ */
+        details {
+            border-bottom: 1px solid var(--border);
+        }
+
+        details:first-of-type {
+            border-top: 1px solid var(--border);
+        }
+
         summary {
-            font-weight: 500;
-            font-size: 15px;
-            cursor: pointer;
             list-style: none;
+            cursor: pointer;
+            padding: 18px 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-        summary::after {
-            content: "↓";
+            font-family: 'DM Sans', sans-serif;
             font-size: 14px;
-            color: var(--red);
-            transition: transform 0.2s;
+            color: var(--ink);
+            gap: 16px;
         }
-        details[open] summary::after {
-            transform: rotate(180deg);
+
+        summary::-webkit-details-marker {
+            display: none;
         }
-        details p {
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--faded);
-        }
-        .social-tabs {
-            display: flex; gap: 16px;
-            margin-top: 40px;
+
+        .si {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            font-size: 12px;
+            color: var(--faded);
+            transition: all 0.25s;
+        }
+
+        details[open] .si {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+            transform: rotate(45deg);
+        }
+
+        .faq-ans {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            font-size: 13px;
+            color: var(--faded);
+            line-height: 1.9;
+            padding-bottom: 18px;
+            padding-right: 36px;
+        }
+
+        /* CREATOR */
+        .creator-card {
+            border: 1px solid var(--border);
+            padding: 28px;
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 20px;
+            align-items: start;
+            background: var(--faint);
+        }
+
+        .creator-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--red);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Shippori Mincho', serif;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .creator-name {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 18px;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .creator-role {
+            font-size: 11px;
+            color: var(--faded);
+            letter-spacing: 0.06em;
+            line-height: 1.9;
+            margin-bottom: 16px;
+        }
+
+        /* SOCIAL */
+        .socials {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .social-btn {
-            background: transparent;
-            position: relative;
-            padding: 8px 20px;
-            display: flex; align-items: center;
-            font-size: 15px; font-weight: 600;
-            text-decoration: none; cursor: pointer;
-            border-radius: 25px; outline: none;
-            overflow: hidden;
-            transition: color 0.3s ease-out, border-color 0.3s ease-out;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
             font-family: 'Noto Sans JP', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 24px;
+            outline: none;
+            overflow: hidden;
+            position: relative;
+            background: transparent;
+            transition: color 0.3s ease-out, border-color 0.3s ease-out;
         }
-
-        .social-btn span { margin-left: 8px; }
 
         .social-btn::before {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            margin: auto; content: ""; border-radius: 50%;
-            display: block; width: 20em; height: 20em; left: -5em;
-            transition: box-shadow 0.4s ease-out; z-index: -1;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -5em;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border-radius: 50%;
+            display: block;
+            width: 20em;
+            height: 20em;
+            z-index: -1;
+            transition: box-shadow 0.4s ease-out;
         }
 
-        /* Github */
-        .social-btn.github { border: 1px solid #4a4a4a; color: #8a8a8a; }
-        .social-btn.github:hover { color: #fff; border-color: #24292e; }
-        .social-btn.github:hover::before { box-shadow: inset 0 0 0 10em #24292e; }
+        .social-btn.github {
+            border: 1px solid #4a4a4a;
+            color: #8a8a8a;
+        }
 
-        /* Linkedin */
-        .social-btn.linkedin { border: 1px solid rgb(0, 119, 181); color: rgb(0, 119, 181); }
-        .social-btn.linkedin:hover { color: #fff; border-color: rgb(0, 119, 181); }
-        .social-btn.linkedin:hover::before { box-shadow: inset 0 0 0 10em rgb(0, 119, 181); }
-        .footer {
-            margin-top: 60px;
-            padding: 40px 24px;
-            background: #090908;
+        .social-btn.github:hover {
+            color: #fff;
+            border-color: #24292e;
+        }
+
+        .social-btn.github:hover::before {
+            box-shadow: inset 0 0 0 10em #24292e;
+        }
+
+        .social-btn.linkedin {
+            border: 1px solid rgba(0, 119, 181, 0.5);
+            color: rgb(0, 119, 181);
+        }
+
+        .social-btn.linkedin:hover {
+            color: #fff;
+            border-color: rgb(0, 119, 181);
+        }
+
+        .social-btn.linkedin:hover::before {
+            box-shadow: inset 0 0 0 10em rgb(0, 119, 181);
+        }
+
+        /* MADE WITH LOVE */
+        .made-with {
+            margin-top: 48px;
+            padding-top: 48px;
             border-top: 1px solid var(--border);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
         }
-        .footer p {
-            font-size: 12px; color: var(--faded);
+
+        .mwl-line {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 11px;
+            color: var(--faded);
+            letter-spacing: 0.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .back-nav {
-            position: fixed; top: 24px; left: 24px;
-            z-index: 100;
+
+        .heart {
+            color: var(--red);
+            font-size: 13px;
+            animation: hb 2s ease-in-out infinite;
+            display: inline-block;
         }
-        .back-btn {
-            background: var(--bg); border: 1px solid var(--border); border-radius: 50%;
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            color: var(--ink); cursor: pointer; text-decoration: none; font-size: 18px;
+
+        @keyframes hb {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            14% {
+                transform: scale(1.3)
+            }
+
+            28% {
+                transform: scale(1)
+            }
+
+            42% {
+                transform: scale(1.15)
+            }
+
+            56% {
+                transform: scale(1)
+            }
         }
-        .back-btn:hover { border-color: var(--red); }
+
+        .mwl-name {
+            font-family: 'Shippori Mincho', serif;
+            font-size: 16px;
+            color: var(--ink);
+            letter-spacing: 0.1em;
+        }
+
+        .mwl-name span {
+            color: var(--red);
+        }
+
+        .enter-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn-enter {
+            cursor: pointer;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            font-family: 'Shippori Mincho', serif;
+            font-size: 14px;
+            padding: 12px 40px;
+            letter-spacing: 0.3em;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .btn-enter:hover {
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        /* ANIMATIONS */
+        .anim {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .anim {
+                animation: rise 0.7s ease-out forwards;
+            }
+
+            .anim:nth-child(1) {
+                animation-delay: 100ms
+            }
+
+            .anim:nth-child(2) {
+                animation-delay: 250ms
+            }
+
+            .anim:nth-child(3) {
+                animation-delay: 400ms
+            }
+
+            .anim:nth-child(4) {
+                animation-delay: 550ms
+            }
+
+            .anim:nth-child(5) {
+                animation-delay: 700ms
+            }
+
+            .anim:nth-child(6) {
+                animation-delay: 850ms
+            }
+
+            .anim:nth-child(7) {
+                animation-delay: 1000ms
+            }
+
+            .anim:nth-child(8) {
+                animation-delay: 1150ms
+            }
+        }
+
+        @keyframes rise {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hanko {
+                top: 24px;
+                right: 24px
+            }
+
+            .vert-text {
+                display: none
+            }
+
+            .back-btn {
+                left: 24px;
+                top: 28px
+            }
+
+            .page {
+                padding: 100px 1.25rem 80px
+            }
+
+            .chain {
+                flex-direction: column
+            }
+
+            .chain-node {
+                border-right: none;
+                border-bottom: 1px solid var(--border)
+            }
+
+            .chain-node:last-child {
+                border-bottom: none
+            }
+
+            .creator-card {
+                grid-template-columns: 1fr
+            }
+        }
     </style>
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'dark';
+            if (t === 'light') {
+                document.documentElement.classList.add('light-mode');
+                document.addEventListener('DOMContentLoaded', () => document.body.classList.add('light-mode'));
+            }
+        })();
+    </script>
 </head>
+
 <body>
-    <div class="back-nav"><a href="intro.html" class="back-btn">←</a></div>
-    <div class="container">
-        <header class="header">
-            <h1>Advanced Roleplay Chat & Anime Network Engine</h1>
-            <p>A Seamless Bridge between AI Companion and Aesthetics</p>
-        </header>
 
-        <section class="section">
-            <h2>The Story of ARCANE</h2>
-            <p style="margin-bottom: 14px;">It began as a simple question: <em>What if interacting with an AI felt less like reading a spreadsheet, and more like turning the page of a beautifully illustrated novel?</em></p>
-            <p style="margin-bottom: 14px;">Standard AI assistants are built for dry spreadsheets or debugging code, stripping away every ounce of personality, depth, and fiction. <strong>ARCANE was born to reverse that philosophy.</strong> It started from a desire to hold conversations with beloved Anime and video game personalities without their dialogues feeling generic, restricted, or prompt-bound.</p>
-            <p style="margin-bottom: 14px;">The architecture quickly evolved into something greater. To prioritize maximum responsiveness and air-tight user privacy, ARCANE was grounded in **Edge Sub-threading**. Instead of routing your personal chat triggers through massive corporate cloud servers, it operates with fully containerized pipelines supporting local streams, meaning your stories live strictly within your dashboard scope downwards chords.</p>
-            <p>Then arrived the defining dimension—<strong>The Visual Novel Engine</strong>. To simulate deep immersive visual cues, an adaptive react component triggers hand-crafted graphics triggers automatically during response streams. Making ARCANE not merely an app or chatbot, but a gorgeous and aesthetic narrative sanctuary continuous streams backwards datasets framing absolute flawlessly offsets upwards !</p>
-        </section>
+    <svg class="washi" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <filter id="n">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0,0 1 0 0 0,0 0 1 0 0,0 0 0 0.1 0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#n)" />
+    </svg>
 
-        <section class="section">
-            <h2>The Vision</h2>
-            <p>ARCANE is crafted as a lightweight, offline-accessible dashboard that bridges immersive Visual Novel dynamics with state-of-the-art AI interactions. Purpose-built for low-latency streaming layouts on edge computers, supporting rich character customisation, visual scene reactors, and intelligent context scopes continuous seamlessly downwards flawlessly coordinate offsets thresholds !</p>
-        </section>
+    <div class="bg-kanji">縁</div>
+    <div class="hanko" onclick="toggleTheme()" title="Toggle Theme">縁</div>
+    <script>
+        function toggleTheme() {
+            const isLight = document.documentElement.classList.toggle('light-mode');
+            document.body.classList.toggle('light-mode', isLight);
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+    </script>
+    <div class="vert-text">アルケイン·コンパニオン</div>
+    <a href="intro.html" class="back-btn">← Back</a>
 
-        <section class="section">
-            <h2>Frequently Asked Questions</h2>
-            <details>
-                <summary><span>How does ARCANE respond so fast?</span></summary>
-                <p>ARCANE connects strictly edge architectures to local streams via sub-threaded LocalBridge endpoints and hyper-threaded API sockets so replies arrive streams seamlessly with zero cloud propagation absolute effortlessly setups downloads continuous!</p>
-            </details>
-            <details>
-                <summary><span>Can I clears conversation memory nodes comfortably?</span></summary>
-                <p>Absolutely. Navigating towards internal sidebar or menu actions triggers instantaneous purge execution queues across indices correctly.</p>
-            </details>
-            <details>
-                <summary><span>Are dialogue modes fully encrypted?</span></summary>
-                <p>Everything sits fully isolated within strictly Client-Bounded IndexedDB datasets setup node anchors frame backwards securely continuous properly forwards flawless.</p>
-            </details>
-        </section>
+    <main class="page">
 
-        <div class="social-tabs">
-          <button class="social-btn github" onclick="window.open('https://github.com/yashatgitt', '_blank')">
-            <svg viewBox="0 0 16 16" fill="currentColor" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-            <span>GitHub</span>
-          </button>
-          
-          <button class="social-btn linkedin" onclick="window.open('https://www.linkedin.com/in/yash-gangurde-95557328b/', '_blank')">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M18.3362 18.339H15.6707V14.1622C15.6707 13.1662 15.6505 11.8845 14.2817 11.8845C12.892 11.8845 12.6797 12.9683 12.6797 14.0887V18.339H10.0142V9.75H12.5747V10.9207H12.6092C12.967 10.2457 13.837 9.53325 15.1367 9.53325C17.8375 9.53325 18.337 11.3108 18.337 13.6245V18.339H18.3362ZM7.00373 8.57475C6.14573 8.57475 5.45648 7.88025 5.45648 7.026C5.45648 6.1725 6.14648 5.47875 7.00373 5.47875C7.85873 5.47875 8.55173 6.1725 8.55173 7.026C8.55173 7.88025 7.85798 8.57475 7.00373 8.57475ZM8.34023 18.339H5.66723V9.75H8.34023V18.339ZM19.6697 3H4.32923C3.59498 3 3.00098 3.5805 3.00098 4.29675V19.7033C3.00098 20.4202 3.59498 21 4.32923 21H19.6675C20.401 21 21.001 20.4202 21.001 19.7033V4.29675C21.001 3.5805 20.401 3 19.6675 3H19.6697Z"/></svg>
-            <span>LinkedIn</span>
-          </button>
+        <!-- HERO -->
+        <div class="hero anim">
+            <div class="hero-eyebrow">Project Compendium</div>
+            <div class="hero-title">A·R·C·A·N·E<br>
+                <span style="font-size:0.52em;letter-spacing:0.1em;font-weight:400;">Advanced Roleplay Chat & Anime
+                    Network Engine</span>
+            </div>
+            <div class="hero-sub">
+                A character-focused AI roleplay platform. Fifteen anime characters, each with lore-anchored
+                personalities — not chatbots with names, but constructed identities that hold across a full
+                conversation.
+            </div>
         </div>
-        <div style="text-align:center; margin-top: 20px; font-weight: 500; font-size: 14px; color: var(--red);">Made with ❤️ by Yash GG✨</div>
-    </div>
 
-    <footer class="footer">
-        <p>© 2026 Advanced Roleplay Chat & Anime Network Engine. Purely aesthetic edge dashboards setups.</p>
-    </footer>
+        <!-- STORY -->
+        <div class="block anim">
+            <div class="block-label">The Story</div>
+            <p class="story-body">
+                It started from a simple frustration — <em>every AI interaction felt like reading a spreadsheet.</em>
+                Generic. Flat. No soul. ARCANE was built to reverse that.
+                <br><br>
+                The goal was to build something that felt like stepping into a favourite anime — where characters
+                respond with actual personality, not just the right words. Each of the fifteen characters has a deep
+                psychological profile, unique speech patterns, and lore-specific context baked into the system prompt.
+                <br><br>
+                What started as a single Flask endpoint became a full PWA with a three-tier LLM fallback chain, live web
+                search via tool calling, per-user auth, and a visual novel overlay that breathes alongside the
+                conversation.
+            </p>
+        </div>
+
+        <!-- INTELLIGENCE -->
+        <div class="block anim">
+            <div class="block-label">Intelligence Layer</div>
+            <div class="chain">
+                <div class="chain-node hot">
+                    <div class="chain-badge">Primary</div>
+                    <div class="chain-name">Ollama</div>
+                    <div class="chain-model">Local · llama3.1:8b</div>
+                </div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-node">
+                    <div class="chain-badge">Fallback 1</div>
+                    <div class="chain-name">Groq</div>
+                    <div class="chain-model">Llama 3.3 · 70b</div>
+                </div>
+                <div class="chain-arrow">→</div>
+                <div class="chain-node">
+                    <div class="chain-badge">Fallback 2</div>
+                    <div class="chain-name">Gemini</div>
+                    <div class="chain-model">1.5 Flash</div>
+                </div>
+            </div>
+            <p class="chain-desc">Three-tier fallback — local inference first, cloud when the tunnel is down. Groq
+                handles native tool calling for live web search via Tavily. Signal never fully drops.</p>
+        </div>
+
+        <!-- STACK -->
+        <div class="block anim">
+            <div class="block-label">Stack</div>
+            <table class="tech-table">
+                <tr>
+                    <td>Backend</td>
+                    <td>Python · Flask <span class="tag">REST API</span></td>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Vanilla JS · PWA · Service Worker</td>
+                </tr>
+                <tr>
+                    <td>LLM Chain</td>
+                    <td>Ollama → Groq → Gemini <span class="tag">Tool Calling</span></td>
+                </tr>
+                <tr>
+                    <td>Web Search</td>
+                    <td>Tavily API · Real-time</td>
+                </tr>
+                <tr>
+                    <td>Auth</td>
+                    <td>JWT · bcrypt · SQLite</td>
+                </tr>
+                <tr>
+                    <td>Security</td>
+                    <td>Rate limiting · CORS · Regex filters</td>
+                </tr>
+                <tr>
+                    <td>Characters</td>
+                    <td>15 pre-loaded + Custom builder</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FAQ -->
+        <div class="block anim">
+            <div class="block-label">FAQ</div>
+
+            <details>
+                <summary>How does the LLM fallback chain work? <div class="si">+</div>
+                </summary>
+                <p class="faq-ans">Every chat request first checks if the local Ollama tunnel is alive. If it responds,
+                    the local model handles inference — fast and private. If the tunnel is down or Ollama fails, the
+                    request falls to Groq's Llama 3.3 70b, which also handles web search tool calls natively. Gemini is
+                    the last resort. All three tiers share the same character system prompt so personality stays
+                    consistent regardless of which model responds.</p>
+            </details>
+
+            <details>
+                <summary>Is my conversation data stored anywhere? <div class="si">+</div>
+                </summary>
+                <p class="faq-ans">Chat history is stored in your browser's IndexedDB locally and optionally synced to
+                    the backend database tied to your account. The backend never logs message contents beyond what's
+                    needed for history retrieval. Incognito mode keeps everything in-memory and wipes on session end.
+                </p>
+            </details>
+
+            <details>
+                <summary>What is the Visual Novel mode? <div class="si">+</div>
+                </summary>
+                <p class="faq-ans">Every assistant response optionally triggers a VN overlay — a character sprite with a
+                    typewriter-style dialogue box, background matched to the character's universe, and speed-line flash
+                    effects for dramatic messages. Fully client-side, pure CSS and JS, zero external dependencies.</p>
+            </details>
+
+            <details>
+                <summary>Can I create my own characters? <div class="si">+</div>
+                </summary>
+                <p class="faq-ans">Yes. The custom character builder is a 5-step modal — identity, appearance,
+                    personality traits, a live Groq-generated preview, and confirmation. Custom characters are stored in
+                    IndexedDB and work identically to pre-loaded ones including tool calling and incognito mode.</p>
+            </details>
+        </div>
+
+        <!-- CREATOR -->
+        <div class="block anim">
+            <div class="block-label">Creator</div>
+            <div class="creator-card">
+                <div class="creator-ring">Y</div>
+                <div>
+                    <div class="creator-name">Yash Gangurde</div>
+                    <div class="creator-role">
+                        Final year B.E. Information Technology<br>
+                        Sinhgad College of Engineering, Pune · 2026<br>
+                        AI &amp; Automation Engineer
+                    </div>
+                    <div class="socials">
+                        <a class="social-btn github" href="https://github.com/yashatgitt" target="_blank"
+                            rel="noopener">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path
+                                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                            </svg>
+                            GitHub
+                        </a>
+                        <a class="social-btn linkedin" href="https://www.linkedin.com/in/yash-gangurde-95557328b/"
+                            target="_blank" rel="noopener">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M18.336 18.339H15.67v-4.177c0-.996-.02-2.278-1.388-2.278-1.39 0-1.601 1.084-1.601 2.205v4.25h-2.666V9.75h2.56v1.17h.035c.358-.674 1.228-1.387 2.528-1.387 2.7 0 3.2 1.778 3.2 4.091v4.715zM7.004 8.575a1.548 1.548 0 1 1 0-3.096 1.548 1.548 0 0 1 0 3.096zm1.336 9.764H5.667V9.75H8.34v8.589zM19.67 3H4.329C3.594 3 3 3.58 3 4.297v15.406C3 20.42 3.594 21 4.328 21H19.67c.734 0 1.33-.58 1.33-1.297V4.297C21 3.58 20.404 3 19.67 3z" />
+                            </svg>
+                            LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MADE WITH LOVE -->
+        <div class="made-with anim">
+            <div class="mwl-line">crafted with <span class="heart">♥</span> in Pune</div>
+            <div class="mwl-name">Yash <span>GG</span> ✦</div>
+            <div class="enter-wrap">
+                <button class="btn-enter" onclick="window.location.href='intro.html'">Enter ARCANE</button>
+            </div>
+        </div>
+
+    </main>
 </body>
+
 </html>

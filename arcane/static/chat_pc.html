@@ -529,7 +529,8 @@
       z-index: 10;
       overflow-y: auto;
       padding: 40px;
-      background: var(--paper); /* Ensures solid bg even if grid is empty */
+      background: var(--paper);
+      /* Ensures solid bg even if grid is empty */
     }
 
     .empty-title {
@@ -2941,7 +2942,7 @@
         <div class="modal-section-title">Appearance</div>
         <div class="settings-row">
           <div>
-            <div class="settings-row-label">Font Size</div>
+            <div class="settings-row-label">Chat Font Size</div>
           </div>
           <div class="slider-group">
             <button class="slider-opt" data-fs="sm">Small</button>
@@ -3037,7 +3038,7 @@
     let db = null;
     let characters = [];
     let activeCharId = null;
-    
+
     // User Identity & Auth Token for backend isolation
     let authToken = localStorage.getItem('auth_token');
     let userId = localStorage.getItem('auth_user_id') || localStorage.getItem('arcane_user_id');
@@ -3488,8 +3489,8 @@
         updateChapterCounter();
 
         // Sync with backend (don't overwrite if local has more until further logic)
-        fetch(`/history/${charId}?user_id=${userId}`, { 
-          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {} 
+        fetch(`/history/${charId}?user_id=${userId}`, {
+          headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
         }).then(r => r.json()).then(remoteMsgs => {
           if (remoteMsgs && Array.isArray(remoteMsgs) && remoteMsgs.length > msgs.length) {
             chatHistory[charId] = remoteMsgs.map(m => ({
@@ -3605,7 +3606,7 @@
         askAgain.onclick = () => {
           const bub = wrap.querySelector('.bubble');
           const msgText = bub ? bub.innerText : text;
-          if (msgText) doSend(msgText, true);
+          if (msgText) doSend(msgText, null, true);
         };
         actions.appendChild(askAgain);
       }
@@ -3629,7 +3630,7 @@
         if (isError) {
           const retry = document.createElement('span');
           retry.className = 'retry-link'; retry.textContent = 'Retry';
-          retry.onclick = () => { const lastUser = getLastUserMsg(); if (lastUser) doSend(lastUser, true); };
+          retry.onclick = () => { const lastUser = getLastUserMsg(); if (lastUser) doSend(lastUser, null, true); };
           bc.appendChild(retry);
         }
         wrap.appendChild(bc);
@@ -3675,10 +3676,39 @@
       const input = document.getElementById('pcInput');
       let text = input.value.trim();
       if (!text && !attachedFile) return;
-      if (attachedFile) text = `[File: ${attachedFile.name} (${formatBytes(attachedFile.size)})] ${text}`;
+
+      const fileToProcess = attachedFile;
       clearAttachment();
       input.value = '';
       input.style.height = '20px'; // Reset tall height
+
+      if (fileToProcess) {
+        const isText = fileToProcess.type.startsWith('text/') || fileToProcess.name.match(/\.(md|csv|json|xml|html)$/i);
+        if (isText) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const finalTxt = `[File: ${fileToProcess.name}]\n\n${e.target.result}\n\n${text ? 'User: ' + text : ''}`;
+            doSend(finalTxt);
+          };
+          reader.readAsText(fileToProcess);
+          return;
+        } else if (fileToProcess.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const b64 = e.target.result;
+            const finalTxt = text ? text : `[Image: ${fileToProcess.name}]`;
+            doSend(finalTxt, b64);
+          };
+          reader.readAsDataURL(fileToProcess);
+          return;
+        } else {
+          const excMsg = `[System Notice: The user uploaded a file named ${fileToProcess.name} (${formatBytes(fileToProcess.size)}). As an AI, you cannot analyze this file format directly. Inform the user politely in character.]`;
+          const finalTxt = text ? `${excMsg}\n${text}` : excMsg;
+          doSend(finalTxt);
+          return;
+        }
+      }
+
       doSend(text);
     }
 
@@ -3688,7 +3718,7 @@
       doSend(msg);
     }
 
-    function doSend(text, isRetry = false) {
+    function doSend(text, imageB64 = null, isRetry = false) {
       if (sending || !activeCharId) return;
 
       const cs = chatSettings[activeCharId] || { len: 'short', lang: 'en', memory: true, nickname: '' };
@@ -3782,8 +3812,8 @@
 
       fetch('/chat', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
+        headers: {
+          'Content-Type': 'application/json',
           'X-User-ID': userId,
           ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
         },
@@ -3791,6 +3821,7 @@
           user_id: userId,
           character: activeCharId,
           message: text,
+          image: imageB64,
           history: reqHist,
           max_tokens: maxTok,
           nickname_hint: nicknameHint,
@@ -3808,8 +3839,14 @@
         if (gs.enableVN && isFirstMsg && !isErr && !vnMan) playVN(activeCharId, reply, true);
 
         if (isErr) {
-          const charErrors = ['Connection scrambled...', 'Simulated matrix glitch...', 'Energy core overload...'];
-          const randomError = charErrors[Math.floor(Math.random() * charErrors.length)];
+          const activeChar = characters.find(c => c.id === activeCharId);
+          let randomError = 'Connection scrambled...';
+          if (activeChar && activeChar.catchphrase) {
+            randomError = `${activeChar.catchphrase} [Signal lost]`;
+          } else {
+            const charErrors = ['Connection scrambled...', 'Simulated matrix glitch...', 'Energy core overload...'];
+            randomError = charErrors[Math.floor(Math.random() * charErrors.length)];
+          }
           const technicalDetails = escHTML(data.error || 'Network exception or safety block trigger.');
           reply = `<div class="error-detail-wrapper"><span>${randomError}</span><details style="margin-top:8px; font-size:11px; color:var(--faded); cursor:pointer;"><summary style="outline:none;"></summary><p style="margin-top:4px; padding-left:4px; border-left:2px solid var(--border);">${technicalDetails}</p></details></div>`;
           appendBubble('assistant', reply, true, isErr);
@@ -3822,7 +3859,7 @@
 
         // Create wrapper for streamed message
         const newWrap = appendBubble('assistant', '', true, isErr);
-        
+
         chatHistory[activeCharId].push({ sender: 'assistant', text: reply, ts: Date.now(), error: isErr });
         if (cs.memory !== false && !isIncognito) saveMsg(activeCharId, 'assistant', reply);
         updateChapterCounter();
@@ -3836,8 +3873,15 @@
         document.getElementById('pcSendBtn').style.display = 'flex';
         document.getElementById('pcStopBtn').style.display = 'none';
 
-        const charErrors = ['Connection scrambled...', 'Simulated matrix glitch...', 'Energy core overload...'];
-        const randomError = charErrors[Math.floor(Math.random() * charErrors.length)];
+        const activeChar = characters.find(c => c.id === activeCharId);
+        let randomError = 'Connection scrambled...';
+        if (activeChar && activeChar.catchphrase) {
+          randomError = `${activeChar.catchphrase} [Signal lost]`;
+        } else {
+          const charErrors = ['Connection scrambled...', 'Simulated matrix glitch...', 'Energy core overload...'];
+          randomError = charErrors[Math.floor(Math.random() * charErrors.length)];
+        }
+
         const reply = `<div class="error-detail-wrapper"><span>${randomError}</span><details style="margin-top:8px; font-size:11px; color:var(--faded); cursor:pointer;"><summary style="outline:none;"></summary><p style="margin-top:4px; padding-left:4px; border-left:2px solid var(--border);">Network error or timeout occurred.</p></details></div>`;
         appendBubble('assistant', reply, true, true);
         chatHistory[activeCharId].push({ sender: 'assistant', text: 'Signal lost.', ts: Date.now(), error: true });
@@ -3882,7 +3926,7 @@
       const lastUser = getLastUserMsg();
       if (lastUser) {
         showToast('Regenerating...');
-        doSend(lastUser);
+        doSend(lastUser, null, true);
       }
     }
 
@@ -3904,31 +3948,31 @@
     let confirmItv = null; // Track global interval for confirmation
     function customConfirm(title, msg, onYes, timerSec = 0) {
       if (confirmItv) clearInterval(confirmItv); // Stop any previous timer
-      
+
       const m = document.getElementById('custom-confirm');
       const yesBtn = document.getElementById('confirm-yes');
       const noBtn = document.getElementById('confirm-no');
-      
+
       document.getElementById('confirm-title').textContent = title;
       document.getElementById('confirm-text').innerHTML = msg;
-      
+
       // Reset button state to clean state
       yesBtn.textContent = 'Confirm';
       yesBtn.disabled = false;
       yesBtn.style.opacity = '1';
       yesBtn.style.cursor = 'pointer';
-      
+
       m.style.display = 'flex';
 
-      yesBtn.onclick = () => { 
+      yesBtn.onclick = () => {
         if (confirmItv) clearInterval(confirmItv);
-        m.style.display = 'none'; 
-        onYes(); 
+        m.style.display = 'none';
+        onYes();
       };
-      
-      noBtn.onclick = () => { 
+
+      noBtn.onclick = () => {
         if (confirmItv) clearInterval(confirmItv);
-        m.style.display = 'none'; 
+        m.style.display = 'none';
       };
 
       if (timerSec > 0) {
@@ -4071,10 +4115,10 @@
       const proceed = () => {
         const sug = document.getElementById('set-suggestion').value.trim();
         if (sug) {
-          fetch('/suggest', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'X-User-ID': userId }, 
-            body: JSON.stringify({ suggestion: sug, user_id: userId }) 
+          fetch('/suggest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+            body: JSON.stringify({ suggestion: sug, user_id: userId })
           })
             .then(() => document.getElementById('set-suggestion').value = '');
         }
@@ -4478,7 +4522,7 @@
         openDB((err, d) => {
           const tx = d.transaction(['custom_characters', 'messages'], 'readwrite');
           tx.objectStore('custom_characters').delete(activeCharId);
-          
+
           // Clear messages from IndexedDB for this character
           const msgIdx = tx.objectStore('messages').index('character');
           msgIdx.openCursor(IDBKeyRange.only(activeCharId)).onsuccess = ev => {
@@ -4488,7 +4532,7 @@
               cursor.continue();
             }
           };
-          
+
           tx.oncomplete = () => {
             fetch(`/history/${activeCharId}?user_id=${userId}`, { method: 'DELETE', headers: { 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) } })
               .then(r => { if (!r.ok) console.error('Backend deletion failed:', r.status); })

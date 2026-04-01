@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Roleplay Chat & Anime Network Engine</title>
+    <title>A.R.C.A.N.E</title>
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -138,7 +138,10 @@
             font-size: 12px;
             z-index: 10;
             user-select: none;
+            cursor: pointer;
+            transition: transform 0.3s;
         }
+        .hanko:hover { transform: scale(1.1); }
 
         .vert-text {
             position: fixed;
@@ -469,7 +472,14 @@
     </svg>
 
     <!-- Decor -->
-    <div class="hanko">縁</div>
+    <div class="hanko" onclick="toggleTheme()" title="Toggle Theme">縁</div>
+    <script>
+        function toggleTheme() {
+            const isLight = document.documentElement.classList.toggle('light-mode');
+            document.body.classList.toggle('light-mode', isLight);
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+    </script>
     <div class="vert-text">アルケイン·コンパニオン</div>
 
     <!-- Main Hero -->
@@ -485,8 +495,11 @@
             <path d="M1,3 Q10,1 20,4 T39,3" pathLength="100" />
         </svg>
 
-        <h1 class="title anim-fade" data-step="2" style="font-size: clamp(24px, 4vw, 36px); letter-spacing: 0.05em;">Advanced Roleplay Chat & Anime Network Engine</h1>
+        <h1 class="title anim-fade" data-step="2" style="font-size: clamp(40px, 8vw, 80px); letter-spacing: 0.05em;">ARCANE</h1>
         <div class="subtitle anim-fade" data-step="3">アルケイン</div>
+
+        <div class="subtitle anim-fade" data-step="1" style="font-size: clamp(6px, 2vw, 12px); letter-spacing: 0.05em;">Advanced Roleplay Chat & Anime Network Engine</div>
+        
 
         <p class="tagline anim-fade" data-step="4">
             Fifteen characters. One conversation at a time.

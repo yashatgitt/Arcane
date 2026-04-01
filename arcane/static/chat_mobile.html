@@ -10,7 +10,7 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-   <title>A.R.C.A.N.E. — Advanced Roleplay Chat & Anime Network Engine</title>
+  <title>A.R.C.A.N.E. — Advanced Roleplay Chat & Anime Network Engine</title>
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <meta name="description" content="Advanced Roleplay Chat & Anime Network Engine">
   <meta name="mobile-web-app-capable" content="yes">
@@ -224,7 +224,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: var(--paper); /* Mask the dotted background to prevent "skeletal" look */
+      background: var(--paper);
+      /* Mask the dotted background to prevent "skeletal" look */
     }
 
     #selectView.hidden {
@@ -258,7 +259,10 @@
       justify-content: center;
       font-family: var(--font-serif);
       font-size: 12px;
+      cursor: pointer;
+      transition: transform 0.3s;
     }
+    .sel-hanko:hover { transform: scale(1.1); }
 
     .sel-search {
       padding: 12px 20px;
@@ -2310,6 +2314,16 @@
         setLight(t === 'light');
       }
     })();
+
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light-mode');
+      document.body.classList.toggle('light-mode', isLight);
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      // Sync global settings UI if open
+      document.querySelectorAll('#ssTheme .bs-pill').forEach(b => {
+        b.classList.toggle('active', b.dataset.v === (isLight ? 'light' : 'dark'));
+      });
+    }
   </script>
 
 </head>
@@ -2342,7 +2356,7 @@
             Anime Roleplay Companion with Adaptive Neural Engine</div>
         </a>
         <div style="display:flex; gap:12px; align-items:center;">
-          <div class="sel-hanko">縁</div>
+          <div class="sel-hanko" onclick="toggleTheme()" title="Toggle Theme">縁</div>
         </div>
       </div>
       <div class="sel-search">
@@ -2741,7 +2755,7 @@
     <script>
       const IDB = 'arcane_db', IDB_V = 5;
       let db = null, chars = [], activeId = null, history = {}, sending = false, streamStop = false, speechRec = null, attFile = null;
-      
+
       // User Identity & Auth Token for backend isolation
       let authToken = localStorage.getItem('auth_token');
       let userId = localStorage.getItem('auth_user_id') || localStorage.getItem('arcane_user_id');
@@ -2807,32 +2821,32 @@
       function pushToHistory(msgObj) { if (isIncognito) incognitoHistory.push(msgObj); else { if (activeId) { if (!history[activeId]) history[activeId] = []; history[activeId].push(msgObj); } } }
       function getMsgs(cid, cb) { odb((e, d) => { if (e) return cb([]); const tx = d.transaction('messages', 'readonly'); const idx = tx.objectStore('messages').index('character'); const r = []; idx.openCursor(IDBKeyRange.only(cid)).onsuccess = ev => { const c = ev.target.result; if (c) { r.push(c.value); c.continue(); } else { r.sort((a, b) => a.timestamp - b.timestamp); cb(r); } }; }); }
       function allMsgMap(cb) { odb((e, d) => { if (e) return cb({}); const tx = d.transaction('messages', 'readonly'); const m = {}; tx.objectStore('messages').openCursor().onsuccess = ev => { const c = ev.target.result; if (c) { const v = c.value; if (!m[v.character]) m[v.character] = { first: null, last: null, ts: 0, count: 0 }; if (!m[v.character].first && v.role === 'user') m[v.character].first = v.content; m[v.character].last = v.content; if (v.timestamp > m[v.character].ts) m[v.character].ts = v.timestamp; m[v.character].count++; c.continue(); } else cb(m); }; }); }
-      function delMsgs(cid, cb) { 
-        odb((e, d) => { 
-          if (e) return cb && cb(); 
-          const tx = d.transaction('messages', 'readwrite'); 
-          const idx = tx.objectStore('messages').index('character'); 
-          idx.openCursor(IDBKeyRange.only(cid)).onsuccess = ev => { 
-            const c = ev.target.result; if (c) { c.delete(); c.continue(); } 
-          }; 
+      function delMsgs(cid, cb) {
+        odb((e, d) => {
+          if (e) return cb && cb();
+          const tx = d.transaction('messages', 'readwrite');
+          const idx = tx.objectStore('messages').index('character');
+          idx.openCursor(IDBKeyRange.only(cid)).onsuccess = ev => {
+            const c = ev.target.result; if (c) { c.delete(); c.continue(); }
+          };
           tx.oncomplete = () => {
             fetch(`/history/${cid}?user_id=${userId}`, { method: 'DELETE', headers: { 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) } })
               .then(r => { if (r.ok) { cb && cb(); } else { console.error('Backend deletion failed:', r.status); cb && cb(); } })
               .catch(err => { console.error('Delete fetch error:', err); cb && cb(); });
           };
-        }); 
+        });
       }
-      function delAllMsgs(cb) { 
-        odb((e, d) => { 
-          if (e) return cb && cb(); 
-          const tx = d.transaction('messages', 'readwrite'); 
-          tx.objectStore('messages').clear(); 
+      function delAllMsgs(cb) {
+        odb((e, d) => {
+          if (e) return cb && cb();
+          const tx = d.transaction('messages', 'readwrite');
+          tx.objectStore('messages').clear();
           tx.oncomplete = () => {
             fetch(`/history/all?user_id=${userId}`, { method: 'DELETE', headers: { 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) } })
               .then(r => { if (r.ok) { cb && cb(); } else { console.error('Backend deletion failed:', r.status); cb && cb(); } })
               .catch(err => { console.error('Delete fetch error:', err); cb && cb(); });
           };
-        }); 
+        });
       }
 
       let toastT = null;
@@ -2973,46 +2987,46 @@
         };
         $('msgList').innerHTML = ''; $('suggestions').innerHTML = '';
         iGet('chatSettings', id, saved => { cs[id] = saved || { charId: id, nickname: '', len: 'short', lang: 'en', memory: true, context: '' }; syncBS(); });
-          getMsgs(id, localMsgs => {
-            // Initial render from local DB
-            history[id] = localMsgs.map(m => ({ 
-              sender: m.role === 'user' ? 'user' : 'char', 
-              text: m.content, 
-              ts: m.timestamp 
-            }));
-            renderMsgs(false);
-            updateChapter();
+        getMsgs(id, localMsgs => {
+          // Initial render from local DB
+          history[id] = localMsgs.map(m => ({
+            sender: m.role === 'user' ? 'user' : 'char',
+            text: m.content,
+            ts: m.timestamp
+          }));
+          renderMsgs(false);
+          updateChapter();
 
-            if (!localMsgs.length) { $('welcomeScreen').classList.remove('hidden'); } else { $('welcomeScreen').classList.add('hidden'); }
+          if (!localMsgs.length) { $('welcomeScreen').classList.remove('hidden'); } else { $('welcomeScreen').classList.add('hidden'); }
 
-            // Sync with backend
-            fetch(`/history/${id}?user_id=${userId}`, { 
-              headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {} 
-            }).then(r => r.json()).then(remoteMsgs => {
-              if (remoteMsgs && Array.isArray(remoteMsgs) && remoteMsgs.length > localMsgs.length) {
-                history[id] = remoteMsgs.map(m => ({ 
-                  sender: m.role, 
-                  text: m.content, 
-                  ts: new Date(m.created_at).getTime() 
-                }));
-                renderMsgs(false);
-                updateChapter();
-              }
-            }).catch(err => {
-              console.warn("History sync failed", err);
-            });
-
-            if (!localMsgs.length && STARTERS[id]) { 
-              const sg = $('suggestions'); 
-              STARTERS[id].forEach(s => { 
-                const p = document.createElement('button'); 
-                p.className = 'sug-pill'; 
-                p.textContent = s; 
-                p.addEventListener('click', () => { $('chatInput').value = s; handleSend(); sg.innerHTML = ''; }); 
-                sg.appendChild(p); 
-              }); 
+          // Sync with backend
+          fetch(`/history/${id}?user_id=${userId}`, {
+            headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+          }).then(r => r.json()).then(remoteMsgs => {
+            if (remoteMsgs && Array.isArray(remoteMsgs) && remoteMsgs.length > localMsgs.length) {
+              history[id] = remoteMsgs.map(m => ({
+                sender: m.role,
+                text: m.content,
+                ts: new Date(m.created_at).getTime()
+              }));
+              renderMsgs(false);
+              updateChapter();
             }
+          }).catch(err => {
+            console.warn("History sync failed", err);
           });
+
+          if (!localMsgs.length && STARTERS[id]) {
+            const sg = $('suggestions');
+            STARTERS[id].forEach(s => {
+              const p = document.createElement('button');
+              p.className = 'sug-pill';
+              p.textContent = s;
+              p.addEventListener('click', () => { $('chatInput').value = s; handleSend(); sg.innerHTML = ''; });
+              sg.appendChild(p);
+            });
+          }
+        });
       }
       function closeChat() {
         if (activeId) {
@@ -3055,7 +3069,40 @@
 
       function handleSend() {
         if (navigator.vibrate) navigator.vibrate(50);
-        const inp = $('chatInput'); let text = inp.value.trim(); if (!text && !attFile) return; if (attFile) { text = '[File: ' + attFile.name + ' (' + fmtB(attFile.size) + ')] ' + text; window.clearAtt(); } inp.value = ''; inp.style.height = '18px'; $('suggestions').innerHTML = ''; doSend(text);
+        const inp = $('chatInput'); let text = inp.value.trim(); if (!text && !attFile) return;
+        
+        const fileToProcess = attFile;
+        window.clearAtt();
+        inp.value = ''; inp.style.height = '18px'; $('suggestions').innerHTML = '';
+        
+        if (fileToProcess) {
+          const isText = fileToProcess.type.startsWith('text/') || fileToProcess.name.match(/\.(md|csv|json|xml|html)$/i);
+          if (isText) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              const finalTxt = `[File: ${fileToProcess.name}]\n\n${e.target.result}\n\n${text ? 'User: ' + text : ''}`;
+              doSend(finalTxt);
+            };
+            reader.readAsText(fileToProcess);
+            return;
+          } else if (fileToProcess.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = e => {
+              const b64 = e.target.result;
+              const finalTxt = text ? text : `[Image: ${fileToProcess.name}]`;
+              doSend(finalTxt, b64);
+            };
+            reader.readAsDataURL(fileToProcess);
+            return;
+          } else {
+            const excMsg = `[System Notice: The user uploaded a file named ${fileToProcess.name} (${fmtB(fileToProcess.size)}). As an AI, you cannot analyze this file format directly. Inform the user politely in character.]`;
+            const finalTxt = text ? `${excMsg}\n${text}` : excMsg;
+            doSend(finalTxt);
+            return;
+          }
+        }
+        
+        doSend(text);
       }
 
       document.querySelectorAll('#bsMood .bs-pill').forEach(b => b.addEventListener('click', () => {
@@ -3089,7 +3136,7 @@
           .catch(err => console.warn('[Mood] Fetch failed:', err));
       }));
 
-      function doSend(text) {
+      function doSend(text, imageB64 = null) {
         if (sending || !activeId) return; const s = cs[activeId] || { len: gs.globalLen || 'short', lang: 'en', memory: true, nickname: '', context: '' }; const len = s.len || gs.globalLen || 'short';
         const isFirstMsg = !(history[activeId] && history[activeId].length > 0);
         if (!history[activeId]) history[activeId] = []; addBubble('user', text, true); if (s.memory !== false && !isIncognito) saveMsg(activeId, 'user', text);
@@ -3151,22 +3198,23 @@
 
         const nh = s.nickname ? 'The user\'s nickname is "' + s.nickname + '". ' : ''; const lh = s.lang === 'hinglish' ? 'Reply in Hinglish. ' : '';
         const ch = chars.find(c => c.id === activeId);
-        const payload = { 
+        const payload = {
           user_id: userId,
-          character: activeId, 
-          message: text, 
-          history: rh, 
-          max_tokens: maxTok, 
-          nickname_hint: nh, 
-          lang_hint: lh, 
-          extra_context: s.context || '' 
+          character: activeId,
+          message: text,
+          image: imageB64,
+          history: rh,
+          max_tokens: maxTok,
+          nickname_hint: nh,
+          lang_hint: lh,
+          extra_context: s.context || ''
         };
         if (ch && ch.is_custom) payload.custom_character = ch;
-  
-        fetch('/chat', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) }, 
-            body: JSON.stringify(payload) 
+
+        fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) },
+          body: JSON.stringify(payload)
         }).then(r => r.json()).then(data => {
           typW.remove(); sending = false; $('sendBtn').style.display = ''; $('stopBtn').style.display = 'none';
           const isErr = !data.response || data.source === 'FAIL'; let reply = data.response || getErrorMsg(activeId);
@@ -3175,7 +3223,12 @@
         }).catch(() => { typW.remove(); sending = false; $('sendBtn').style.display = ''; $('stopBtn').style.display = 'none'; const errMsg = getErrorMsg(activeId); const reply = `<div class="error-detail-wrapper"><span>${errMsg}</span><details style="margin-top:8px; font-size:11px; color:var(--faded); cursor:pointer;"><summary style="outline:none;"></summary><p style="margin-top:4px; padding-left:4px; border-left:2px solid var(--border);">Network error or timeout occurred.</p></details></div>`; addBubble('char', reply, true, true); pushToHistory({ sender: 'char', text: 'Signal lost.', ts: Date.now(), error: true }); });
       }
 
-      function getErrorMsg(id) { const e = ERRORS[id] || ERRORS.default; return e[Math.floor(Math.random() * e.length)]; }
+      function getErrorMsg(id) { 
+        const ch = chars.find(c => c.id === id);
+        if (ch && ch.catchphrase) return `${ch.catchphrase} [Signal lost]`;
+        const e = ERRORS[id] || ERRORS.default; 
+        return e[Math.floor(Math.random() * e.length)]; 
+      }
       function getLastUser() { const h = history[activeId] || []; for (let i = h.length - 1; i >= 0; i--)if (h[i].sender === 'user') return h[i].text; return null; }
       function showTyping() { const list = $('msgList'); const ch = chars.find(c => c.id === activeId); const w = document.createElement('div'); w.className = 'msg-wrap char no-anim'; const av = document.createElement('img'); av.className = 'msg-avatar'; av.src = ch?.image || ''; if (ch?.mal_id) av.onerror = () => fetchJikan(ch.mal_id, av); w.appendChild(av); const col = document.createElement('div'); col.className = 'msg-col'; const b = document.createElement('div'); b.className = 'bubble'; b.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>'; col.appendChild(b); w.appendChild(col); list.appendChild(w); $('msgArea').scrollTop = $('msgArea').scrollHeight; return w; }
       function streamWords(wrap, text, done) { const bub = wrap.querySelector('.bubble'); if (!bub) { done(); return; } bub.textContent = ''; const words = text.split(' '); let i = 0; streamStop = false; function next() { if (streamStop || i >= words.length) { bub.innerHTML = formatMsgContent(bub.textContent); done(); return; } bub.textContent += (i > 0 ? ' ' : '') + words[i++]; $('msgArea').scrollTop = $('msgArea').scrollHeight; setTimeout(next, 30); } next(); }
@@ -3255,13 +3308,13 @@
         const fnt = document.querySelector('#ssFont .bs-pill.active'); if (fnt) gs.fontSize = fnt.dataset.v;
         const gl = document.querySelector('#ssGLen .bs-pill.active'); if (gl) gs.globalLen = gl.dataset.v;
         gs.showTimestamps = $('ssTimestamps').checked; gs.showChapter = $('ssChapter').checked; gs.hideActions = false; if ($('ssEnableVN')) gs.enableVN = $('ssEnableVN').checked; profile.settings = gs;
-        const sug = $('ssSuggestion').value.trim(); 
-        if (sug) { 
-          fetch('/suggest', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json', 'X-User-ID': userId }, 
-            body: JSON.stringify({ suggestion: sug, user_id: userId }) 
-          }).then(() => $('ssSuggestion').value = ''); 
+        const sug = $('ssSuggestion').value.trim();
+        if (sug) {
+          fetch('/suggest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-User-ID': userId },
+            body: JSON.stringify({ suggestion: sug, user_id: userId })
+          }).then(() => $('ssSuggestion').value = '');
         }
         const save = () => { iPut('profile', profile, () => { applyGS(); if (activeId) renderMsgs(false); $('settingsSheet').classList.remove('open'); toast('Saved'); }); }; if (f) { const r = new FileReader(); r.onloadend = () => { profile.avatar = r.result; save(); }; r.readAsDataURL(f); } else save();
       });
@@ -3299,14 +3352,14 @@
 
         m.style.display = 'flex';
 
-        yesBtn.onclick = () => { 
+        yesBtn.onclick = () => {
           if (confirmItv) clearInterval(confirmItv);
-          m.style.display = 'none'; 
-          onYes(); 
+          m.style.display = 'none';
+          onYes();
         };
-        noBtn.onclick = () => { 
+        noBtn.onclick = () => {
           if (confirmItv) clearInterval(confirmItv);
-          m.style.display = 'none'; 
+          m.style.display = 'none';
         };
 
         if (timerSec > 0) {
@@ -3620,7 +3673,7 @@
           odb((err, d) => {
             const tx = d.transaction(['custom_characters', 'messages'], 'readwrite');
             tx.objectStore('custom_characters').delete(activeId);
-            
+
             // Clear messages from IndexedDB for this character
             const msgIdx = tx.objectStore('messages').index('character');
             msgIdx.openCursor(IDBKeyRange.only(activeId)).onsuccess = ev => {
@@ -3630,7 +3683,7 @@
                 cursor.continue();
               }
             };
-            
+
             tx.oncomplete = () => {
               fetch(`/history/${activeId}?user_id=${userId}`, { method: 'DELETE', headers: { 'X-User-ID': userId, ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}) } })
                 .then(r => { if (!r.ok) console.error('Backend deletion failed:', r.status); })
