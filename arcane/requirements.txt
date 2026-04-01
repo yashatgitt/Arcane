@@ -9,3 +9,4 @@ groq
 google-generativeai
 bcrypt
 PyJWT
+gunicorn
