@@ -25,12 +25,6 @@ arcane/arcane.db
 # Logs & Temporary Files
 *.log
 *.txt
-!user_list.txt
-!suggestions.txt
-!arcane/user_list.txt
-!arcane/suggestions.txt
-!**/user_list.txt
-!**/suggestions.txt
 
 # Test Outputs
 arcane/static/test_sw_output.txt
