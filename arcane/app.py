@@ -17,6 +17,7 @@ from functools import wraps
 import requests
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, request, send_from_directory, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 import uuid
 import secrets
 from flask_cors import CORS
@@ -81,7 +82,10 @@ CHAR_MAP = {ch['id']: ch for ch in CHARACTERS}
 # ---------------------------------------------------------------------------
 # Flask app
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 app = Flask(__name__, static_folder=STATIC_DIR, static_url_path='')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 SECRET_KEY_VAL = os.getenv('SECRET_KEY', '').strip()
 if not SECRET_KEY_VAL:
     raise ValueError("SECRET_KEY environment variable is required. Generate with: python -c 'import secrets; print(secrets.token_hex(24))'")
@@ -98,7 +102,7 @@ if not origins:
 if NGROK_URL and NGROK_URL not in origins:
     origins.append(NGROK_URL)
 
-CORS(app, origins=origins, methods=['GET', 'POST', 'DELETE', 'OPTIONS'], allow_headers=['Content-Type', 'X-User-ID'])
+CORS(app, origins=origins, methods=['GET', 'POST', 'DELETE', 'OPTIONS'], allow_headers=['Content-Type', 'X-User-ID', 'Authorization'])
 
 # ---------------------------------------------------------------------------
 # Supabase Database Helpers
@@ -941,30 +945,7 @@ def save_suggestion():
             
     return jsonify({'status': 'ok'})
 
-# --- Self-Pinger for Render Free Tier ---
-def self_ping():
-    try:
-        import time, requests
-    except ImportError:
-        return
-    time.sleep(30)
-    APP_URL = os.getenv('APP_URL', '').strip()
-    if not APP_URL:
-        return
-    while True:
-        try:
-            requests.get(f"{APP_URL}/ping", timeout=10)
-            print("[ping] alive")
-        except Exception as e:
-            print(f"[ping] failed: {e}")
-        time.sleep(840) # 14 minutes
 
-@app.route('/ping')
-def ping():
-    return jsonify({"status": "alive"}), 200
-
-# Start background pinger
-threading.Thread(target=self_ping, daemon=True).start()
 
 if __name__ == '__main__':
     print('=' * 50)
