@@ -23,6 +23,8 @@ import secrets
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import threading
+import time
 import bcrypt
 import jwt
 
@@ -925,6 +927,31 @@ def save_suggestion():
             f.write(log_entry)
             
     return jsonify({'status': 'ok'})
+
+# --- Self-Pinger for Render Free Tier ---
+def self_ping():
+    try:
+        import time, requests
+    except ImportError:
+        return
+    time.sleep(30)
+    APP_URL = os.getenv('APP_URL', '').strip()
+    if not APP_URL:
+        return
+    while True:
+        try:
+            requests.get(f"{APP_URL}/ping", timeout=10)
+            print("[ping] alive")
+        except Exception as e:
+            print(f"[ping] failed: {e}")
+        time.sleep(840) # 14 minutes
+
+@app.route('/ping')
+def ping():
+    return jsonify({"status": "alive"}), 200
+
+# Start background pinger
+threading.Thread(target=self_ping, daemon=True).start()
 
 if __name__ == '__main__':
     print('=' * 50)
