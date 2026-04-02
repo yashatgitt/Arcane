@@ -25,6 +25,7 @@
 <img src="https://img.shields.io/badge/Gemini-1.5%20Flash-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini">
 <img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA">
 <img src="https://img.shields.io/badge/Status-Production-brightgreen?style=flat-square" alt="Status">
+<img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License">
 </p>
 
 </div>
@@ -51,12 +52,12 @@ Ask a generic chatbot "What happened between you and Geto?" and get generic AI t
 <div align="center">
 <table>
 <tr>
-<td align="center"><b>Welcome Screen</b></td>
+<td align="center"><b>Desktop Interface</b></td>
 <td align="center"><b>Chat & Visual Novels</b></td>
 <td align="center"><b>Character Selection</b></td>
 </tr>
 <tr>
-<td><img src="arcane/static/assets/github%20images/intro_page.png" width="280"/></td>
+<td><img src="arcane/static/assets/github%20images/light_theme_ui.png" width="280"/></td>
 <td><img src="arcane/static/assets/github%20images/chat_ui_with_vn_overlay.png" width="280"/></td>
 <td><img src="arcane/static/assets/github%20images/char_grid_page.png" width="280"/></td>
 </tr>
@@ -129,14 +130,12 @@ Ask a generic chatbot "What happened between you and Geto?" and get generic AI t
 <div align="center">
 <table>
 <tr>
-<td align="center"><b>Web Search</b></td>
-<td align="center"><b>Image Analysis</b></td>
-<td align="center"><b>Login & Auth</b></td>
+<td align="center"><b>Web Search & Real-time Info</b></td>
+<td align="center"><b>Vision & Image Recognition</b></td>
 </tr>
 <tr>
-<td><img src="arcane/static/assets/github%20images/web_search_ablity.png" width="260"/></td>
-<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="260"/></td>
-<td><img src="arcane/static/assets/github%20images/login_page.png" width="260"/></td>
+<td><img src="arcane/static/assets/github%20images/web_search_ablity.png" width="400"/></td>
+<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="400"/></td>
 </tr>
 </table>
 </div>
@@ -167,30 +166,22 @@ Guest Mode: user_id = 'global'
 | **Output** | Regex filters remove function tags, IPs, timestamps |
 | **Tunnel** | X-API-Key + ngrok header required |
 
-**Onboarding Flow:**
+**Mobile Onboarding & Security Flow:**
 <div align="center">
 <table>
 <tr>
-<td align="center"><b>Login Portal</b></td>
-<td align="center"><b>Sign In</b></td>
-<td align="center"><b>Account Setup</b></td>
+<td align="center"><b>1. Login</b></td>
+<td align="center"><b>2. Sign In</b></td>
+<td align="center"><b>3. Basic Setup</b></td>
+<td align="center"><b>4. Persona Info</b></td>
+<td align="center"><b>5. Welcome</b></td>
 </tr>
 <tr>
-<td><img src="arcane/static/assets/github%20images/login_page.png" width="250"/></td>
-<td><img src="arcane/static/assets/github%20images/sign_in_page%201.png" width="250"/></td>
-<td><img src="arcane/static/assets/github%20images/setup_page%201_name_and_image_upload_of_user.png" width="250"/></td>
-</tr>
-<tr>
-<td colspan="3" align="center"><b>User Profile & Preferences Setup</b></td>
-</tr>
-<tr>
-<td colspan="3" align="center"><img src="arcane/static/assets/github%20images/setup_page%202_user_info_and_custom_instuction_for_llm.png" width="280"/></td>
-</tr>
-<tr>
-<td colspan="3" align="center"><b>Welcome to ARCANE</b></td>
-</tr>
-<tr>
-<td colspan="3" align="center"><img src="arcane/static/assets/github%20images/setup_page%203_final_welcome_page.png" width="280"/></td>
+<td><img src="arcane/static/assets/github%20images/login_page.png" width="160"/></td>
+<td><img src="arcane/static/assets/github%20images/sign_in_page%201.png" width="160"/></td>
+<td><img src="arcane/static/assets/github%20images/setup_page%201_name_and_image_upload_of_user.png" width="160"/></td>
+<td><img src="arcane/static/assets/github%20images/setup_page%202_user_info_and_custom_instuction_for_llm.png" width="160"/></td>
+<td><img src="arcane/static/assets/github%20images/setup_page%203_final_welcome_page.png" width="160"/></td>
 </tr>
 </table>
 </div>
@@ -228,18 +219,8 @@ Each character has a 200-400 word **handcrafted persona** including:
 
 **UI Showcase:**
 <div align="center">
-<table>
-<tr>
-<td align="center"><b>Desktop Interface</b></td>
-<td align="center"><b>Mobile Interface</b></td>
-<td align="center"><b>Advanced Features</b></td>
-</tr>
-<tr>
-<td><img src="arcane/static/assets/github%20images/light_theme_ui.png" width="260"/></td>
-<td><img src="arcane/static/assets/github%20images/responsive%20_to_mobile_ui%20.png" width="260"/></td>
-<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="260"/></td>
-</tr>
-</table>
+  <p><b>Mobile Native Experience & PWA</b></p>
+  <img src="arcane/static/assets/github%20images/responsive%20_to_mobile_ui%20.png" width="350" style="border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);border: 8px solid #222;"/>
 </div>
 
 **Key features:**
@@ -393,59 +374,9 @@ Arcane/
 
 ---
 
-## 🎓 Key Concepts
+## 📄 License
+MIT © [Yash Gangurde](https://github.com/yashatgitt)
 
-### Lore Triggers
-Characters recognize specific keywords and respond with canon accuracy. Examples:
-- **Gojo**: "Infinity", "Sukuna", "Geto" → references JJK storyline
-- **L**: "Light", "Kira", "notebook" → references Death Note
-- **Naruto**: "Sasuke", "Nine-Tails", "Hokage" → references naruto lore
-
-### Custom Characters
-Users can define custom personas with field limits:
-- Description (500 chars), Speech style (200), Name (50), Catchphrase (100)
-- Route through Groq/Gemini only (no local Ollama)
-- Same lore trigger system applies
-
-### Double-Write Pattern
-Each message is written to DB twice:
-1. **Before inference** — logs user input (survives even if AI fails)
-2. **After inference** — logs AI response
-This ensures reliability and complete history.
-
-### Service Worker Caching
-```
-HTML/Navigation    → Network-First (always fresh code)
-Static Assets      → Stale-While-Revalidate (instant load)
-API Endpoints      → Network-Only (never cache dynamic)
-Localhost          → Bypass (dev mode)
-```
-
----
-
-## 🚀 Quick References
-
-**Start app locally:**
-```bash
-python app.py
-```
-
-**Run Ollama locally:**
-```bash
-ollama pull llama3.1:8b && ollama serve
-```
-
-**Start tunnel (separate terminal):**
-```bash
-cd tunnel && python run.py
-```
-
-**Generate secrets:**
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
----
 
 ## 👤 About
 
