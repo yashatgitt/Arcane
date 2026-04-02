@@ -1076,6 +1076,8 @@
       font-size: var(--font-size);
       line-height: 1.7;
       word-wrap: break-word;
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     .msg-user .bubble {
@@ -1237,15 +1239,15 @@
       /* Float exactly above input wrapper */
       left: 16px;
       width: auto !important;
-      max-width: 160px;
-      height: 36px;
-      padding: 0 12px;
+      max-width: 240px;
+      height: 52px;
+      padding: 0 14px;
       background: var(--paper);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       z-index: 100002;
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
       overflow: visible !important;
@@ -1291,6 +1293,15 @@
       content: "📄";
       /* Standard Icon explicit */
       font-size: 13px;
+    }
+
+    .message-image-attachment {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: block;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .input-wrapper {
@@ -3571,7 +3582,7 @@
       return ht.trim();
     }
 
-    function appendBubble(sender, text, animate = true, isError = false) {
+    function appendBubble(sender, text, animate = true, isError = false, imageB64 = null) {
       const cont = document.getElementById('pcMessages');
       const char = characters.find(c => c.id === activeCharId);
       text = text || '';
@@ -3638,6 +3649,12 @@
         const bub = document.createElement('div');
         bub.className = 'bubble';
         bub.innerHTML = (isError && text.startsWith('<div')) ? text : formatMsgContent(text);
+        if (imageB64 && imageB64.startsWith('data:image/')) {
+          const img = document.createElement('img');
+          img.src = imageB64;
+          img.className = 'message-image-attachment';
+          bub.appendChild(img);
+        }
         wrap.appendChild(bub);
       }
 
@@ -3687,7 +3704,8 @@
         if (isText) {
           const reader = new FileReader();
           reader.onload = e => {
-            const finalTxt = `[File: ${fileToProcess.name}]\n\n${e.target.result}\n\n${text ? 'User: ' + text : ''}`;
+            const truncatedName = truncateFilename(fileToProcess.name);
+            const finalTxt = `[File: ${truncatedName}]\n\n${e.target.result}\n\n${text ? 'User: ' + text : ''}`;
             doSend(finalTxt);
           };
           reader.readAsText(fileToProcess);
@@ -3696,7 +3714,8 @@
           const reader = new FileReader();
           reader.onload = e => {
             const b64 = e.target.result;
-            const finalTxt = text ? text : `[Image: ${fileToProcess.name}]`;
+            const truncatedName = truncateFilename(fileToProcess.name);
+            const finalTxt = text ? text : `[Image: ${truncatedName}]`;
             doSend(finalTxt, b64);
           };
           reader.readAsDataURL(fileToProcess);
@@ -3728,7 +3747,7 @@
 
       // Add user message to UI
       const ts = Date.now();
-      appendBubble('user', text, true);
+      appendBubble('user', text, true, false, imageB64);
       if (cs.memory !== false && !isIncognito) saveMsg(activeCharId, 'user', text);
 
       const isCreatorQuestion = (msg) => {
@@ -4270,6 +4289,16 @@
     function formatBytes(b) {
       if (b < 1024) return b + 'B'; if (b < 1048576) return (b / 1024).toFixed(1) + 'KB';
       return (b / 1048576).toFixed(1) + 'MB';
+    }
+
+    function truncateFilename(name, maxLen = 25) {
+      if (name.length <= maxLen) return name;
+      const dotIndex = name.lastIndexOf('.');
+      if (dotIndex === -1) return name.substring(0, maxLen) + '...';
+      const ext = name.substring(dotIndex);
+      const baseName = name.substring(0, dotIndex);
+      const remaining = maxLen - ext.length - 3;
+      return baseName.substring(0, Math.max(1, remaining)) + '...' + ext;
     }
 
     // ============================================================
