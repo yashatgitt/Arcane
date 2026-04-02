@@ -52,7 +52,7 @@ Ask a generic chatbot "What happened between you and Geto?" and get generic AI t
 <div align="center">
 <table>
 <tr>
-<td align="center"><b>Desktop Interface</b></td>
+<td align="center"><b>Desktop Interface with light theme</b></td>
 <td align="center"><b>Chat & Visual Novels</b></td>
 <td align="center"><b>Character Selection</b></td>
 </tr>
