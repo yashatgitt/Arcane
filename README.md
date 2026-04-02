@@ -10,27 +10,20 @@
 
 <h1>A · R · C · A · N · E</h1>
 <p><b>Advanced Roleplay Chat & Anime Network Engine</b></p>
-<p><i>The bridge between static lore and meaningful interaction.</i></p>
+<p><i>The bridge between static lore and immersive AI interaction.</i></p>
 
 <p>
 <a href="https://arcane-m7pi.onrender.com" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%9A%80%20Live%20App-Visit%20ARCANE-C9513A?style=for-the-badge" alt="Live"/></a>
+&nbsp;&nbsp;
+<a href="docs/setup.md"><img src="https://img.shields.io/badge/📖%20Docs-Full%20Guide-555?style=for-the-badge" alt="Docs"/></a>
 </p>
 
 <p>
 <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/Flask-2.x-000000?style=flat-square&logo=flask&logoColor=white" alt="Flask">
-<img src="https://img.shields.io/badge/Gunicorn-Production-499848?style=flat-square&logo=gunicorn&logoColor=white" alt="Gunicorn">
-<img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase">
-<img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA">
-<img src="https://img.shields.io/badge/Render-Deployed-46E3B7?style=flat-square&logo=render&logoColor=white" alt="Render">
-</p>
-
-<p>
 <img src="https://img.shields.io/badge/Groq-Llama%203.3%2070b-F55036?style=flat-square&logo=meta&logoColor=white" alt="Groq">
 <img src="https://img.shields.io/badge/Gemini-1.5%20Flash-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini">
-<img src="https://img.shields.io/badge/Ollama-Local%20LLM-grey?style=flat-square" alt="Ollama">
-<img src="https://img.shields.io/badge/Tavily-Web%20Search-FF6B35?style=flat-square" alt="Tavily">
-<img src="https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT">
+<img src="https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA">
 <img src="https://img.shields.io/badge/Status-Production-brightgreen?style=flat-square" alt="Status">
 </p>
 
@@ -38,200 +31,431 @@
 
 ---
 
-## 🚀 Core User Experience
+## 🚀 What is ARCANE?
 
-ARCANE is an AI roleplay platform built for anime fans who want more than generic responses. Each character has a handcrafted 200–400 word persona that includes deep lore, specific speech patterns, and "Lore Triggers" — keywords that prompt the AI to recall specific canon events truthfully.
+ARCANE is an **AI roleplay platform** for anime fans who want meaningful conversations with AI characters. Unlike generic chatbots:
+
+- **Handcrafted personas** (200-400 words) with deep lore and speech patterns
+- **Lore Triggers** — keywords that trigger canon-accurate responses
+- **Multi-model fallback** — Ollama → Groq → Gemini (automatic switching)
+- **Visual Novel mode** — immersive full-screen character interactions
+- **Web search** — characters access real-time information
+- **Image recognition** — analyze uploaded images/documents
+- **Custom characters** — create your own AI personas
+- **PWA installable** — works offline, mobile-native
+
+### The Problem It Solves
+
+Ask a generic chatbot "What happened between you and Geto?" and get generic AI text. ARCANE fixes this with hand-written personas that include specific canon events, relationships, speech quirks, and lore trigger phrases that make responses feel authentic.
 
 <div align="center">
 <table>
 <tr>
 <td align="center"><b>Welcome Screen</b></td>
 <td align="center"><b>Chat & Visual Novels</b></td>
-<td align="center"><b>Interactive Roster</b></td>
+<td align="center"><b>Character Selection</b></td>
 </tr>
 <tr>
-<td><img src="arcane/static/assets/github%20images/intro_page.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/chat_ui_with_vn_overlay.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/char_grid_page.png" width="300"/></td>
+<td><img src="arcane/static/assets/github%20images/intro_page.png" width="280"/></td>
+<td><img src="arcane/static/assets/github%20images/chat_ui_with_vn_overlay.png" width="280"/></td>
+<td><img src="arcane/static/assets/github%20images/char_grid_page.png" width="280"/></td>
 </tr>
 </table>
 </div>
 
 ---
 
-## 🧠 Intelligence & Architecture
+## ⚡ Quick Feature Overview
 
-The backend implements a highly resilient three-tier model fallback chain. If a local model or a specific cloud provider is rate-limited or down, the next tier picks up the request instantly.
+```
+🤖 AI System              🎨 User Experience      🔐 Security
+├─ 3-tier LLM fallback    ├─ Desktop & mobile    ├─ JWT auth (30 days)
+├─ Web search (Tavily)    ├─ Voice input         ├─ Bcrypt passwords
+├─ Image analysis         ├─ Dark/Light theme    ├─ Rate limiting
+└─ Tool calling           └─ Visual Novel mode   └─ Input sanitization
 
-```text
-Message Flow
-    |
-    ├── TIER 1: Ollama (Local)           [Lowest Latency]
-    │           Health Check -> Request -> Tool Loop
-    │
-    ├── TIER 2: Groq (Llama 3.3 70B)     [Highest Speed Cloud]
-    │           Multi-tool Fallback -> Manual Generation Parsing
-    │
-    └── TIER 3: Gemini 1.5 Flash         [Maximum Reliability]
-                Vision Support -> Web Search Integration
+📱 Progressive Web App    👥 Characters          ⚙️ Infrastructure
+├─ Installable app        ├─ 15+ anime chars     ├─ Supabase PostgreSQL
+├─ Offline support        ├─ Custom characters   ├─ Render deployment
+├─ IndexedDB storage      ├─ Lore triggers       ├─ Gunicorn + Flask
+└─ Smart caching          └─ Speech patterns     └─ ProxyFix for IPs
 ```
 
-### Advanced Capabilities
-
-<div align="center">
-<table>
-<tr>
-<td align="center"><b>Web Search Capability</b></td>
-<td align="center"><b>Visual Recognition</b></td>
-<td align="center"><b>Adaptive Themes</b></td>
-</tr>
-<tr>
-<td><img src="arcane/static/assets/github%20images/web_search_ablity.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/light_theme_ui.png" width="300"/></td>
-</tr>
-</table>
-</div>
-
-- **Real-Time Context**: Integrates Tavily Web Search with "Advanced Depth" for the most accurate and up-to-date information.
-- **Visual Intelligence**: Full support for image and document upload/recognition via Llama 4 Vision and Gemini 1.5.
-- **Roleplay Engine**: Custom-built JS Visual Novel mode for a more immersive storytelling experience.
-
 ---
 
-## 🔐 Security & Identity
+## 🧠 How It Works
 
-Every interaction is secured through industry-standard practices, ensuring your chats and profile remain private.
+```
+┌─────────────────────────────────────────────────────────────┐
+│  User sends message via Desktop/Mobile PWA Interface        │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTPS
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Flask Backend                                              │
+│  ├─ Validate JWT token / guest mode                         │
+│  ├─ Sanitize input (max 2000 chars)                         │
+│  ├─ Build system prompt (character + context + user hints) │
+│  └─ Start LLM cascade...                                    │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+      ┌──────────────────┼──────────────────┐
+      │                  │                  │
+      ▼                  ▼                  ▼
+  ┌────────┐         ┌────────┐         ┌────────┐
+  │ Ollama │ (fail)  │  Groq  │ (fail)  │ Gemini │
+  │ Local  │────────▶│ Cloud  │────────▶│ Cloud  │
+  └────────┘         └────────┘         └────────┘
+                         │                  │
+                         └────────┬─────────┘
+                                  │
+                    ┌─────────────▼──────────────┐
+                    │  Get response + apply      │
+                    │  output filters (regex)    │
+                    └─────────────┬──────────────┘
+                                  │
+                    ┌─────────────▼──────────────┐
+                    │  Double-write to Supabase  │
+                    │  + IndexedDB on frontend   │
+                    └────────────┬───────────────┘
+                                 │
+                    ┌────────────▼────────────┐
+                    │  Return response to     │
+                    │  user in real-time      │
+                    └─────────────────────────┘
+```
 
+**Advanced Capabilities:**
 <div align="center">
 <table>
 <tr>
-<td align="center"><b>Portal Entrance</b></td>
-<td align="center"><b>Sign In Experience</b></td>
-<td align="center"><b>Profile Onboarding</b></td>
+<td align="center"><b>Web Search</b></td>
+<td align="center"><b>Image Analysis</b></td>
+<td align="center"><b>Login & Auth</b></td>
 </tr>
 <tr>
-<td><img src="arcane/static/assets/github%20images/login_page.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/sign_in_page%201.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/setup_page%201.png" width="300"/></td>
-</tr>
-</table>
-</div>
-
-- **Stateless Auth**: JWT-based authentication with 30-day token rotation.
-- **Data Protection**: All sensitive user information is hashed using bcrypt before being stored.
-- **Stateless History**: Hybrid localStorage + Supabase persistence for maximum performance and cross-device sync.
-
----
-
-## 🛠️ Tech Stack
-
-<div align="center">
-<table>
-<tr>
-<td><b>Frontend</b></td>
-<td>
-<img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white" alt="HTML5">
-<img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white" alt="CSS3">
-<img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="JS">
-<img src="https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA">
-</td>
-</tr>
-<tr>
-<td><b>Backend</b></td>
-<td>
-<img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
-<img src="https://img.shields.io/badge/Flask-000000?style=flat-square&logo=flask&logoColor=white" alt="Flask">
-<img src="https://img.shields.io/badge/Gunicorn-499848?style=flat-square&logo=gunicorn&logoColor=white" alt="Gunicorn">
-</td>
-</tr>
-<tr>
-<td><b>AI / LLM</b></td>
-<td>
-<img src="https://img.shields.io/badge/Groq-F55036?style=flat-square&logo=meta&logoColor=white" alt="Groq">
-<img src="https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini">
-<img src="https://img.shields.io/badge/Ollama-Local%20LLM-grey?style=flat-square" alt="Ollama">
-<img src="https://img.shields.io/badge/Tavily-Web%20Search-FF6B35?style=flat-square" alt="Tavily">
-</td>
-</tr>
-<tr>
-<td><b>Data</b></td>
-<td>
-<img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase">
-<img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT">
-<img src="https://img.shields.io/badge/Render-46E3B7?style=flat-square&logo=render&logoColor=white" alt="Render">
-</td>
+<td><img src="arcane/static/assets/github%20images/web_search_ablity.png" width="260"/></td>
+<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="260"/></td>
+<td><img src="arcane/static/assets/github%20images/login_page.png" width="260"/></td>
 </tr>
 </table>
 </div>
 
 ---
 
-## ⚡ Quick Start
+## 🔐 Security & Auth
+
+### Authentication Flow
+```
+Login/Register → JWT Token (HS256, 30-day expiry)
+   ├─ Stored in localStorage
+   ├─ Sent on all protected requests
+   ├─ Verified server-side (no DB lookup needed)
+   └─ Bcrypt passwords with unique salt
+
+Guest Mode: user_id = 'global'
+   └─ Can chat but cannot delete or access user endpoints
+```
+
+### Protection Layers
+| Layer | Method |
+|---|---|
+| **Input** | 2000-char limit + whitespace normalization |
+| **Rate Limit** | 20/min per IP for `/chat`, 5/min for suggestions |
+| **CORS** | Restricted to configured origins only |
+| **IP Handling** | ProxyFix reads real IP through Render proxy |
+| **Output** | Regex filters remove function tags, IPs, timestamps |
+| **Tunnel** | X-API-Key + ngrok header required |
+
+**Onboarding Flow:**
+<div align="center">
+<table>
+<tr>
+<td align="center"><b>Login Portal</b></td>
+<td align="center"><b>Sign In</b></td>
+<td align="center"><b>Account Setup</b></td>
+</tr>
+<tr>
+<td><img src="arcane/static/assets/github%20images/login_page.png" width="250"/></td>
+<td><img src="arcane/static/assets/github%20images/sign_in_page%201.png" width="250"/></td>
+<td><img src="arcane/static/assets/github%20images/setup_page%201_name_and_image_upload_of_user.png" width="250"/></td>
+</tr>
+<tr>
+<td colspan="3" align="center"><b>User Profile & Preferences Setup</b></td>
+</tr>
+<tr>
+<td colspan="3" align="center"><img src="arcane/static/assets/github%20images/setup_page%202_user_info_and_custom_instuction_for_llm.png" width="280"/></td>
+</tr>
+<tr>
+<td colspan="3" align="center"><b>Welcome to ARCANE</b></td>
+</tr>
+<tr>
+<td colspan="3" align="center"><img src="arcane/static/assets/github%20images/setup_page%203_final_welcome_page.png" width="280"/></td>
+</tr>
+</table>
+</div>
+
+---
+
+## 👥 Character System
+
+Each character has a 200-400 word **handcrafted persona** including:
+- **Identity & backstory** — Canon context that shapes behavior
+- **Relationships** — Specific connections with emotional weight
+- **Speech style** — Tone, quirks, catchphrases
+- **Lore triggers** — 5-8 keywords → canon-accurate responses
+- **Never-do's** — Actions the character won't take
+
+**Adding a character:**
+1. Define JSON entry in `characters.json`
+2. Add WebP avatar to `static/assets/avtar/`
+3. (Optional) Create modelfile + add to `tunnel/models.json` for Ollama
+
+**Custom characters** — Users create via API with same structure but no local model support.
+
+---
+
+## 🎨 Frontend Stack
+
+| Component | Tech | Size |
+|---|---|---|
+| **Desktop UI** | Vanilla HTML/CSS/JS | ~170KB |
+| **Mobile UI** | Vanilla HTML/CSS/JS | ~155KB |
+| **Storage** | IndexedDB (local) + Supabase (cloud) | ∞ |
+| **Cache** | Service Worker (v6 versioning) | Smart |
+| **State** | Module-scope variables | Real-time |
+| **Voice** | Web Speech API | Chrome/Edge |
+
+**UI Showcase:**
+<div align="center">
+<table>
+<tr>
+<td align="center"><b>Desktop Interface</b></td>
+<td align="center"><b>Mobile Interface</b></td>
+<td align="center"><b>Advanced Features</b></td>
+</tr>
+<tr>
+<td><img src="arcane/static/assets/github%20images/light_theme_ui.png" width="260"/></td>
+<td><img src="arcane/static/assets/github%20images/responsive%20_to_mobile_ui%20.png" width="260"/></td>
+<td><img src="arcane/static/assets/github%20images/image_and_doc_recognition.png" width="260"/></td>
+</tr>
+</table>
+</div>
+
+**Key features:**
+- **No framework** = no build step, portable, fast
+- **Desktop sidebar**, mobile bottom-sheet, both with character grid
+- **Voice input** with interim transcription overlay
+- **Visual Novel mode** — full-screen animated text
+- **PWA installable** — offline-first with Network-First HTML caching
+- **Swipe gestures** — left-edge drag (25px+80px) closes chat
+- **Android back button** — two-state history buffer prevents accidental exits
+
+---
+
+## 📡 API Endpoints
+
+```
+POST /register              Create account
+POST /login                 Authenticate
+POST /chat                  Send message (20/min limit)
+GET  /characters            List all characters
+GET  /history/<char>        Get last 50 messages (auth)
+POST /history/<char>        Save message
+DEL  /history/<char>        Delete messages (char/"all"/"profile_wipe")
+POST /suggest               Submit feature request (5/min limit)
+```
+
+**POST /chat payload:**
+```json
+{
+  "character": "gojo_satoru",
+  "message": "...",
+  "history": [...],
+  "max_tokens": 120,
+  "nickname_hint": "Call me X",
+  "lang_hint": "Respond in English",
+  "image": "<base64_optional>",
+  "custom_character": { "name": "...", ... }
+}
+```
+
+---
+
+## 🛠️ Installation
+
+### Requirements
+- **Minimum**: Python 3.9+, Groq/Gemini API key, Supabase project
+- **Optional**: Ollama + Ngrok (for local AI)
+
+### Setup (5 min)
 
 ```bash
-# Clone and enter directory
 git clone https://github.com/yashatgitt/Arcane.git
 cd Arcane/arcane
-
-# Install core dependencies
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # Add your API keys
+python app.py          # Visit http://localhost:5001
+```
 
-# Configure environment variables
-cp .env.example .env
-# Fill in your GROQ_API_KEY, GEMINI_API_KEY, and SUPABASE credentials
+### .env Configuration
 
-# Run the engine
+```env
+# AI APIs (free)
+GROQ_API_KEY=          # console.groq.com
+GEMINI_API_KEY=        # aistudio.google.com
+TAVILY_API_KEY=        # app.tavily.com
+
+# Supabase
+SUPABASE_URL=
+SUPABASE_KEY=
+
+# Security (generate with: python -c "import secrets; print(secrets.token_hex(32))")
+BRIDGE_SECRET=
+JWT_SECRET=
+SECRET_KEY=
+
+# Optional: Local Ollama
+NGROK_URL=             # Leave blank for cloud-only
+```
+
+### Database Setup
+
+Run in Supabase SQL Editor:
+
+```sql
+CREATE TABLE users (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), username TEXT UNIQUE NOT NULL, email TEXT, password_hash TEXT, created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE messages (id BIGSERIAL PRIMARY KEY, user_id TEXT, character TEXT, role TEXT, content TEXT, created_at TIMESTAMPTZ DEFAULT now());
+CREATE TABLE suggestions (id BIGSERIAL PRIMARY KEY, user_id TEXT, suggestion TEXT, ip_address TEXT, created_at TIMESTAMPTZ DEFAULT now());
+```
+
+### Deploy to Render
+
+1. Push to GitHub
+2. New Web Service on Render
+3. Root dir: `arcane`, Build: `pip install -r requirements.txt`, Start: `gunicorn app:app`
+4. Add env vars
+5. Deploy ✅
+
+---
+
+## 📊 System Specs
+
+| Aspect | Detail |
+|---|---|
+| **Backend** | Python 3.9+, Flask 2.x, Gunicorn (production) |
+| **Database** | Supabase PostgreSQL + IndexedDB (client-side) |
+| **AI Tiers** | Ollama (local) → Groq (Llama 3.3-70B) → Gemini (1.5 Flash) |
+| **Tools** | Tavily (web search), Groq tool calling |
+| **Auth** | JWT (HS256, 30d), Bcrypt hashing |
+| **PWA** | Service Worker, offline manifest, installable |
+| **Deployment** | Render, auto-HTTPS, environment-based config |
+
+---
+
+## 📚 Full Documentation
+
+Detailed guides available in `/docs`:
+- **[setup.md](docs/setup.md)** — Installation, configuration, deployment
+- **[api.md](docs/api.md)** — All endpoints with request/response schemas
+- **[architecture.md](docs/architecture.md)** — System design, LLM cascade, prompt engineering
+- **[security.md](docs/security.md)** — Auth, encryption, sanitization, rate limiting
+- **[characters.md](docs/characters.md)** — Persona engineering, lore triggers, custom characters
+- **[frontend.md](docs/frontend.md)** — UI architecture, PWA, keyboard handling, voice input
+
+---
+
+## 📁 Project Structure
+
+```
+Arcane/
+├── arcane/
+│   ├── app.py                    # Flask entry point
+│   ├── characters.json           # 15+ character definitions
+│   ├── requirements.txt
+│   ├── Procfile                  # Render config
+│   └── static/
+│       ├── *.html                # UI (intro, chat, onboarding, about)
+│       ├── sw.js                 # Service Worker
+│       ├── manifest.json         # PWA manifest
+│       └── assets/
+│           ├── avtar/            # Character avatars (WebP)
+│           ├── vn/               # Visual Novel portraits
+│           └── github images/    # Docs screenshots
+├── tunnel/
+│   ├── run.py                    # Ollama→Ngrok bridge
+│   ├── models.json               # Local model mappings
+│   └── requirements.txt
+├── docs/                         # Full documentation
+└── README.md
+```
+
+---
+
+## 🎓 Key Concepts
+
+### Lore Triggers
+Characters recognize specific keywords and respond with canon accuracy. Examples:
+- **Gojo**: "Infinity", "Sukuna", "Geto" → references JJK storyline
+- **L**: "Light", "Kira", "notebook" → references Death Note
+- **Naruto**: "Sasuke", "Nine-Tails", "Hokage" → references naruto lore
+
+### Custom Characters
+Users can define custom personas with field limits:
+- Description (500 chars), Speech style (200), Name (50), Catchphrase (100)
+- Route through Groq/Gemini only (no local Ollama)
+- Same lore trigger system applies
+
+### Double-Write Pattern
+Each message is written to DB twice:
+1. **Before inference** — logs user input (survives even if AI fails)
+2. **After inference** — logs AI response
+This ensures reliability and complete history.
+
+### Service Worker Caching
+```
+HTML/Navigation    → Network-First (always fresh code)
+Static Assets      → Stale-While-Revalidate (instant load)
+API Endpoints      → Network-Only (never cache dynamic)
+Localhost          → Bypass (dev mode)
+```
+
+---
+
+## 🚀 Quick References
+
+**Start app locally:**
+```bash
 python app.py
 ```
 
-### 🛠️ App Setup Journey
+**Run Ollama locally:**
+```bash
+ollama pull llama3.1:8b && ollama serve
+```
 
-As you set up ARCANE for the first time, take advantage of the integrated onboarding flow to customize your experience.
+**Start tunnel (separate terminal):**
+```bash
+cd tunnel && python run.py
+```
 
-<div align="center">
-<table>
-<tr>
-<td align="center"><b>Step 1: Configuration</b></td>
-<td align="center"><b>Step 2: Customization</b></td>
-<td align="center"><b>Step 3: Verification</b></td>
-</tr>
-<tr>
-<td><img src="arcane/static/assets/github%20images/setup_page%201.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/setup_page%202.png" width="300"/></td>
-<td><img src="arcane/static/assets/github%20images/setup_page%203.png" width="300"/></td>
-</tr>
-</table>
-</div>
+**Generate secrets:**
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ---
 
-## 📚 Technical Documentation
+## 👤 About
 
-Explore the project deeply through our modular technical guides:
-
-| Component | Technical Depth |
-|---|---|
-| [**Architecture**](docs/architecture.md) | Fallback orchestration, prompt engineering, and request lifecycle. |
-| [**API Reference**](docs/api.md) | Comprehensive endpoint documentation and authentication schemas. |
-| [**Setup Guide**](docs/setup.md) | Environment configuration, Supabase setup, and production deployment. |
-| [**Character System**](docs/characters.md) | Persona design philosophy, lore triggers, and prompt construction. |
-| [**Security**](docs/security.md) | Auth rotation, rate limiting, and output sanitization protocols. |
-| [**Frontend**](docs/frontend.md) | PWA logic, keyboard handling, and Visual Novel engine mechanics. |
-
----
-
-## 👤 About the Engineer
-
-**Yash Gangurde** — Final Year IT Engineering student at Sinhgad College of Engineering, Pune. Focused on high-scale AI orchestration and immersive digital experiences.
+**Yash Gangurde** — Final year IT student at Sinhgad College of Engineering, Pune. Built ARCANE to combine high-scale AI orchestration with immersive anime roleplay.
 
 <p align="center">
-<a href="https://github.com/yashatgitt" target="_blank"><img src="https://img.shields.io/badge/GitHub-yashatgitt-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/></a>
+<a href="https://github.com/yashatgitt"><img src="https://img.shields.io/badge/GitHub-yashatgitt-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
 &nbsp;&nbsp;
-<a href="https://www.linkedin.com/in/yash-gangurde-95557328b/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
+<a href="https://www.linkedin.com/in/yash-gangurde-95557328b/"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin" alt="LinkedIn"/></a>
 </p>
-
----
 
 <div align="center">
   <sub>Built with Lore-Accuracy in Pune, India 🇮🇳</sub>
