@@ -30,7 +30,7 @@ import jwt
 from supabase import create_client, Client
 
 from tavily import TavilyClient
-from groq import Groq
+from groq import Groq, BadRequestError, APIStatusError
 import google.generativeai as genai
 from google.generativeai.types import FunctionDeclaration, Tool
 
@@ -218,7 +218,7 @@ def web_search(query):
     if not tavily:
         return "Web search is disabled. No Tavily API key."
     try:
-        result = tavily.search(query=query, max_results=3)
+        result = tavily.search(query=query, search_depth="advanced", max_results=3)
         answer = result.get("answer") or ""
         snippets = [r["content"] for r in result.get("results", [])[:2]]
         if not answer and not snippets:
@@ -281,7 +281,7 @@ def try_ollama(character, messages, tools=None, max_tokens=250, image_b64=None):
         }
         health_resp = requests.get(f"{NGROK_URL.rstrip('/')}/health", headers=headers, timeout=10)
         if health_resp.status_code != 200:
-            print(f"[!] Ollama health check failed with status {health_resp.status_code}")
+            # Silent failure to avoid terminal noise
             return None
     except requests.Timeout:
         print("[!] Ollama health check timed out")
@@ -324,11 +324,13 @@ def try_ollama(character, messages, tools=None, max_tokens=250, image_b64=None):
     return None
 
 
-def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None):
+def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None, tools_list=None):
     """Groq API using official SDK + Tool Calling"""
     if not groq_client:
-        print("[!] Groq client not initialized (missing API key)")
         return None
+    
+    # Use provided tools_list or fallback to global tools
+    active_tools = tools_list if tools_list is not None else tools
     
     try:
         model_name = "llama-3.3-70b-versatile"
@@ -346,31 +348,81 @@ def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None):
                     ]
                     break
         else:
-            kwargs["tools"] = tools
-            kwargs["tool_choice"] = "auto"
+            if active_tools:
+                kwargs["tools"] = active_tools
+                kwargs["tool_choice"] = "auto"
+                # Disable parallel tool calls to improve formatting for 70b models
+                kwargs["parallel_tool_calls"] = False
             
         kwargs["model"] = model_name
+        
+        # Add a technical hidden hint to help model follow tool calling format
+        # This is appended to the system prompt only for Groq calls
+        msgs[0]["content"] += "\n\nHidden Instruction: If you need to search the web, use the 'web_search' tool strictly using provided tools schema."
         
         first = groq_client.chat.completions.create(
             messages=msgs,
             **kwargs
         )
-    except Exception as e:
-        err_str = str(e)
-        # If tool use failed, retry WITHOUT tools as a plain chat
-        if 'tool_use_failed' in err_str or 'tool call validation failed' in err_str:
+    except BadRequestError as e:
+        # Specifically handle 400 Bad Request which contains 'failed_generation'
+        ebody = getattr(e, 'body', {})
+        failed_gen = ebody.get('error', {}).get('failed_generation', '')
+        err_msg = ebody.get('error', {}).get('message', '').lower()
+        
+        print(f"[!] Groq tool call failed: {err_msg[:80]}")
+        
+        # Expand regex to be more aggressive with different output patterns
+        search_match = re.search(r'web_search\(["\']?query["\']?[:=]\s*["\'](.*?)["\']\)', failed_gen) or \
+                       re.search(r'web_search.*?["\']query["\']:\s*["\'](.*?)["\']', failed_gen) or \
+                       re.search(r'web_search\[.*?"query"\s*:\s*"(.*?)"', failed_gen)
+        
+        if search_match:
+            query = search_match.group(1)
+            print(f"[!] Manual parse of failed_generation successful: web_search('{query}')")
+            result = run_tool("web_search", {"query": query})
+            
+            # Build follow-up manually as if it were a valid tool flow
+            followup = list(messages)
+            # Add the 'simulated' assistant response with the tool call
+            followup.append({
+                "role": "assistant",
+                "content": failed_gen,
+                "tool_calls": [{"id": "call_manual", "type": "function", "function": {"name": "web_search", "arguments": json.dumps({"query": query})}}]
+            })
+            # Add the tool result
+            followup.append({
+                "role": "tool",
+                "tool_call_id": "call_manual",
+                "name": "web_search",
+                "content": str(result)
+            })
+            
             try:
-                print("[!] Groq tool call failed, retrying without tools")
-                msgs[0]["content"] += "\n\nNOTE: Web search is currently unavailable. If asked about real-time info, say you cannot access it right now."
-                fallback = groq_client.chat.completions.create(
+                final = groq_client.chat.completions.create(
                     model=model_name,
-                    messages=msgs,
+                    messages=[{"role": "system", "content": system_prompt}] + followup,
                     max_tokens=max_tokens
                 )
-                return fallback.choices[0].message.content
-            except Exception as e2:
-                print(f"[!] Groq fallback also failed: {type(e2).__name__}: {e2}")
-                return None
+                return final.choices[0].message.content
+            except Exception as fe:
+                print(f"[!] Groq manual follow-up failed: {fe}")
+        
+        # Default fallback: retry without tools if manual parse failed or wasn't found
+        try:
+            print("[!] Groq retrying without tools as fallback")
+            msgs[0]["content"] += "\n\nNOTE: Web search output was malformed. Respond based on your general knowledge or ask for clarification."
+            fallback = groq_client.chat.completions.create(
+                model=model_name,
+                messages=msgs,
+                max_tokens=max_tokens
+            )
+            return fallback.choices[0].message.content
+        except Exception as e2:
+            print(f"[!] Groq fallback also failed: {e2}")
+            return None
+            
+    except Exception as e:
         print(f"[!] Groq first call error: {type(e).__name__}: {e}")
         return None
     
@@ -421,11 +473,13 @@ def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None):
     return msg.content
 
 
-def chat_gemini(messages, system_prompt, max_tokens=120, image_b64=None):
+def chat_gemini(messages, system_prompt, max_tokens=120, image_b64=None, tools_list=None):
     """Gemini API using official SDK + Tool Calling"""
     if not GEMINI_API_KEY:
-        print("[!] Gemini API key not set")
         return None
+    
+    # Use provided tools_list or fallback to gemini_tools
+    active_gemini_tools = tools_list if tools_list is not None else gemini_tools
     
     try:
         model = genai.GenerativeModel(
@@ -609,6 +663,11 @@ def login():
 # ---------------------------------------------------------------------------
 # Routes — Static
 # ---------------------------------------------------------------------------
+@app.route('/health')
+def health_check():
+    """Health check endpoint used by Render, uptime monitors, and the LocalBridge tunnel."""
+    return jsonify({'status': 'ok', 'service': 'arcane'}), 200
+
 @app.route('/')
 def index():
     return send_from_directory(STATIC_DIR, 'intro.html')
@@ -675,8 +734,9 @@ def chat():
     current_date_str = now.strftime('%A, %d %B %Y')
     
     # Pre-emptively detect time queries to adjust system prompt and disable tools
-    time_keywords = ['time', 'clock', 'date', 'today', 'day is it', 'what day', 'current time', 'day is today']
-    user_asking_time = any(k in user_message.lower() for k in time_keywords) and len(user_message) < 60
+    # Removed 'today' because it often triggers on news search ("Pune weather today")
+    time_keywords = ['the time', 'the date', 'clock', 'what time', 'is the time', 'current time']
+    user_asking_time = any(k in user_message.lower() for k in time_keywords) and len(user_message) < 50
 
     if custom_char:
         # Sanitize and truncate inputs to prevent prompt injection & save tokens
@@ -814,20 +874,16 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     if reply is None:
         # Try Groq with tools
         try:
-            r = chat_groq(list(messages), system_prompt, max_tokens=max_tokens, image_b64=image_b64)
-            if r is not None:
-                reply = r
-                source = "groq"
+            reply = chat_groq(messages, system_prompt, max_tokens=max_tokens, image_b64=image_b64, tools_list=active_tools)
+            source = "groq"
         except Exception as e:
             print(f"[!] Groq failed: {type(e).__name__}: {e}")
             
     if reply is None:
         # Try Gemini with tools
         try:
-            r = chat_gemini(list(messages), system_prompt, max_tokens=max_tokens, image_b64=image_b64)
-            if r is not None:
-                reply = r
-                source = "gemini"
+            reply = chat_gemini(messages, system_prompt, max_tokens=max_tokens, image_b64=image_b64, tools_list=gemini_tools if active_tools else None)
+            source = "gemini"
         except Exception as e:
             print(f"[!] Gemini failed: {type(e).__name__}: {e}")
             
