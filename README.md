@@ -197,6 +197,8 @@ Each character has a 200-400 word **handcrafted persona** including:
 - **Lore triggers** — 5-8 keywords → canon-accurate responses
 - **Never-do's** — Actions the character won't take
 
+Also includes **ARCANE Core** — a normal non-anime assistant for users who want a general AI chat experience.
+
 **Adding a character:**
 1. Define JSON entry in `characters.json`
 2. Add WebP avatar to `static/assets/avtar/`
@@ -353,7 +355,7 @@ Detailed guides available in `/docs`:
 Arcane/
 ├── arcane/
 │   ├── app.py                    # Flask entry point
-│   ├── characters.json           # 15+ character definitions
+│   ├── characters.json           # 15+ anime characters + ARCANE Core
 │   ├── requirements.txt
 │   ├── Procfile                  # Render config
 │   └── static/
