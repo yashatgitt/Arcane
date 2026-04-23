@@ -13,7 +13,7 @@
 <p><i>The bridge between static lore and immersive AI interaction.</i></p>
 
 <p>
-<a href="https://arcane-m7pi.onrender.com" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%9A%80%20Live%20App-Visit%20ARCANE-C9513A?style=for-the-badge" alt="Live"/></a>
+<a href="https://arcane.yashgg.me/" target="_blank"><img src="https://img.shields.io/badge/%F0%9F%9A%80%20Live%20App-Visit%20ARCANE-C9513A?style=for-the-badge" alt="Live"/></a>
 &nbsp;&nbsp;
 <a href="docs/setup.md"><img src="https://img.shields.io/badge/📖%20Docs-Full%20Guide-555?style=for-the-badge" alt="Docs"/></a>
 </p>
