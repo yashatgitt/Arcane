@@ -333,12 +333,12 @@ def chat_groq(messages, system_prompt, max_tokens=120, image_b64=None, tools_lis
     active_tools = tools_list if tools_list is not None else tools
     
     try:
-        model_name = "llama-3.3-70b-versatile"
+        model_name = "openai/gpt-oss-120b"
         kwargs = {"max_tokens": max_tokens}
         msgs = [{"role": "system", "content": system_prompt}] + messages
         
         if image_b64:
-            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+            model_name = "qwen/qwen3.6-27b"
             # Modify the last user message to include the image
             for i in range(len(msgs)-1, -1, -1):
                 if msgs[i]['role'] == 'user':
