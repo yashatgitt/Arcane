@@ -896,6 +896,9 @@ You use ONLY ONE roleplay action (like *action*) at the very end.
     print(f"[{source}] Response for: {char_id}")
 
     # Safety net: strip any stray function-call tags that leaked into text
+    # Remove model reasoning / thinking blocks
+    reply = re.sub(r'<think>.*?</think>', '', reply, flags=re.DOTALL)
+    reply = re.sub(r'<think>.*$', '', reply, flags=re.DOTALL)    
     # Remove properly closed function tags
     reply = re.sub(r'<function=[^>]+>.*?</function>', '', reply, flags=re.DOTALL)
     reply = re.sub(r'<function=[^\s>][^>]*>', '', reply)
